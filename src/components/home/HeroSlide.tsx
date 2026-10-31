@@ -18,7 +18,7 @@ export default function HeroSlide({ slide, priority = false }: { slide: Slide; p
             <Link href="/studios" className="inline-flex h-12 items-center justify-center rounded-full bg-white px-7 text-[15px] font-medium text-neutral-950 hover:bg-neutral-200">
               Explore Studios
             </Link>
-            <Link href="/studios" className="inline-flex h-12 items-center justify-center rounded-full border border-white/20 px-7 text-[15px] font-medium hover:bg-white/5">
+            <Link href="/add-studio" className="inline-flex h-12 items-center justify-center rounded-full border border-white/20 px-7 text-[15px] font-medium hover:bg-white/5">
               Host Your Space
             </Link>
           </div>

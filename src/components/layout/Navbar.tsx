@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 
 
 
+
 const Navbar = () => {
     const pathname = usePathname();
 

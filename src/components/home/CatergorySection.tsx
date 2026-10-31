@@ -30,7 +30,7 @@ const CatergorySection = () => {
                             <Icon
                                 aria-hidden="true"
                                 strokeWidth={1.5}
-                                className="size-[22px] text-neutral-400 transition-colors group-hover:text-white"
+                                className="size-[22px] text-blue-400 transition-colors group-hover:text-white"
                             />
                             <div>
                                 <h3 className="text-[15px] font-semibold text-white">

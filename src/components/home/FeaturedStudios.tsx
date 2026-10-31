@@ -56,7 +56,7 @@ export function StudioCard({ studio }: { studio: Studio }) {
       </div>
 
       <div className="flex flex-1 flex-col px-3 pb-1 pt-4">
-        <span className="w-fit rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium text-neutral-200">
+        <span className="w-fit rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium text-blue-400">
           {studio.category}
         </span>
 
@@ -123,7 +123,7 @@ export default async function FeaturedStudios() {
   const studios = await getFeaturedStudios();
 
   return (
-    <section className="bg-[#0A0A0A] text-white mt-10">
+    <section className="bg-[#0A0A0A] text-white pt-8">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:pt-4 lg:pb-16">
         <h2 className="text-[26px] font-bold tracking-[-0.02em] text-white sm:text-[28px]">
           Featured studios

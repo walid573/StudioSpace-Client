@@ -1,9 +1,17 @@
-import Image from "next/image";
+import { Suspense } from "react";
+import CatergorySection from "@/components/home/CatergorySection";
+import HeroSection from "@/components/home/HeroSection";
+import HeroSlide from "@/components/home/HeroSlide";
+import { slides } from "@/components/home/slides";
 
 export default function Home() {
   return (
-    <div >
+    <div>
       
+      <Suspense fallback={<HeroSlide slide={slides[0]} priority />}>
+        <HeroSection />
+      </Suspense>
+      <CatergorySection />
     </div>
   );
 }

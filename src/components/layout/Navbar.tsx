@@ -22,7 +22,7 @@ const Navbar = () => {
             <div className="mx-auto grid max-w-7xl grid-cols-2 items-center gap-4 px-4 py-4 text-white sm:px-6 md:grid-cols-3 lg:px-8">
                 <div>
                     <Link href={'/'} className="flex gap-2 items-center ">
-                        <Image src='/logo.png' alt="This a logo" width={28} height={28} ></Image>
+                        <Image src='/logo.png' alt="StudioSpace logo" width={28} height={28} ></Image>
                         <h2 className="text-xl whitespace-nowrap">StudioSpace</h2>
                     </Link>
 

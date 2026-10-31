@@ -5,6 +5,16 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,
+  images: {
+    // Studio photos are hosted on Unsplash for now.
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      },
+    ],
+  },
   turbopack: {
     rules: {
       "*.css": {

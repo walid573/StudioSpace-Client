@@ -5,47 +5,20 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Pencil, Trash2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import EditBooking, { Booking, Studio } from "@/components/studios/EditBookings";
+import DeleteBooking from "@/components/studios/DeleteBookings";
+
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
-type Booking = {
-  _id: string;
-  studioId: string;
-  date: string;
-  start: string;
-  end: string;
-  hours: number;
-  total: number;
-  status: "pending" | "confirmed" | "declined";
-};
-
-type Studio = {
-  _id: string;
-  title?: string;
-  imageUrl?: string;
-};
 
 type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
 
 const STATUS_META: Record<BookingStatus, { label: string; className: string }> = {
-  pending: {
-    label: "Pending",
-    className: "border-yellow-500/40 bg-yellow-500/10 text-yellow-300",
-  },
-  confirmed: {
-    label: "Confirmed",
-    className: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-  },
-  completed: {
-    label: "Completed",
-    className: "border-white/15 bg-white/[0.06] text-neutral-300",
-  },
-  cancelled: {
-    label: "Cancelled",
-    className: "border-red-500/40 bg-red-500/10 text-red-300",
-  },
+  pending: { label: "Pending", className: "border-yellow-500/40 bg-yellow-500/10 text-yellow-300" },
+  confirmed: { label: "Confirmed", className: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" },
+  completed: { label: "Completed", className: "border-white/15 bg-white/[0.06] text-neutral-300" },
+  cancelled: { label: "Cancelled", className: "border-red-500/40 bg-red-500/10 text-red-300" },
 };
 
 const FILTERS = [
@@ -56,10 +29,6 @@ const FILTERS = [
   { key: "cancelled", label: "Cancelled" },
 ] as const;
 
-const GHOST_BUTTON =
-  "inline-flex h-8 items-center gap-1.5 rounded-full border border-white/10 px-3 text-[12px] text-neutral-200 transition-colors hover:bg-white/[0.06]";
-const DANGER_BUTTON =
-  "inline-flex h-8 items-center gap-1.5 rounded-full border border-red-500/30 px-3 text-[12px] text-red-300 transition-colors hover:bg-red-500/10";
 const PRIMARY_BUTTON =
   "inline-flex h-8 items-center rounded-full bg-white px-3.5 text-[12px] font-medium text-neutral-950 transition-colors hover:bg-neutral-200";
 
@@ -73,8 +42,8 @@ const THUMBNAIL_GRADIENTS = [
 
 function thumbnailGradient(id: string) {
   let hash = 0;
-  for (let index = 0; index < id.length; index += 1) {
-    hash = (hash * 31 + id.charCodeAt(index)) % 997;
+  for (let i = 0; i < id.length; i += 1) {
+    hash = (hash * 31 + id.charCodeAt(i)) % 997;
   }
   return THUMBNAIL_GRADIENTS[hash % THUMBNAIL_GRADIENTS.length];
 }
@@ -89,10 +58,12 @@ export default function MyBookingsPage() {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
   const email = session?.user?.email;
+
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [studios, setStudios] = useState<Studio[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Load bookings + studios once we know who the user is
   useEffect(() => {
     if (isPending) return;
     if (!email) {
@@ -100,21 +71,18 @@ export default function MyBookingsPage() {
       return;
     }
 
-    const userEmail = email;
     let active = true;
 
-    async function loadBookings() {
+    async function loadData() {
       try {
-        const [bookingsResponse, studiosResponse] = await Promise.all([
-          fetch(`${API_URL}/my-bookings/${encodeURIComponent(userEmail)}`, { cache: "no-store" }),
+        const [bookingsRes, studiosRes] = await Promise.all([
+          fetch(`${API_URL}/my-bookings/${encodeURIComponent(email!)}`, { cache: "no-store" }),
           fetch(`${API_URL}/studios`, { cache: "no-store" }),
         ]);
-
-        const bookingData = await bookingsResponse.json();
-        const studioData = studiosResponse.ok ? await studiosResponse.json() : [];
+        const bookingData = await bookingsRes.json();
+        const studioData = studiosRes.ok ? await studiosRes.json() : [];
 
         if (!active) return;
-
         setBookings(Array.isArray(bookingData) ? bookingData : []);
         setStudios(Array.isArray(studioData) ? studioData : []);
       } catch {
@@ -124,18 +92,25 @@ export default function MyBookingsPage() {
       }
     }
 
-    loadBookings();
-
+    loadData();
     return () => {
       active = false;
     };
   }, [email, isPending, router]);
 
-  if (isPending || loading) {
-    return <BookingsSkeleton />;
+  // Called by DeleteBooking after the server deleted the booking
+  function handleDeleted(id: string) {
+    setBookings((current) => current.filter((b) => b._id !== id));
   }
 
-  const studiosById = new Map(studios.map((studio) => [studio._id, studio]));
+  // Called by EditBooking after the server saved the changes
+  function handleUpdated(updated: Booking) {
+    setBookings((current) => current.map((b) => (b._id === updated._id ? updated : b)));
+  }
+
+  if (isPending || loading) return <BookingsSkeleton />;
+
+  const studiosById = new Map(studios.map((s) => [s._id, s]));
 
   const counts: Record<(typeof FILTERS)[number]["key"], number> = {
     all: bookings.length,
@@ -144,7 +119,6 @@ export default function MyBookingsPage() {
     completed: 0,
     cancelled: 0,
   };
-
   for (const booking of bookings) {
     counts[toStatus(booking.status)] += 1;
   }
@@ -169,7 +143,6 @@ export default function MyBookingsPage() {
       <div className="mt-6 flex flex-wrap gap-2">
         {FILTERS.map((filter) => {
           const active = filter.key === "all";
-
           return (
             <button
               key={filter.key}
@@ -196,10 +169,7 @@ export default function MyBookingsPage() {
           <p className="mt-1.5 max-w-xs text-[13px] text-neutral-400">
             Browse the studios and reserve your first session.
           </p>
-          <Link
-            href="/studios"
-            className="mt-5 inline-flex h-9 items-center rounded-full bg-white px-4 text-[12px] font-medium text-neutral-950 transition-colors hover:bg-neutral-200"
-          >
+          <Link href="/studios" className={`mt-5 h-9 px-4 ${PRIMARY_BUTTON}`}>
             Explore Studios
           </Link>
         </div>
@@ -217,17 +187,15 @@ export default function MyBookingsPage() {
                 className="flex flex-wrap items-center gap-3.5 rounded-2xl border border-white/[0.07] bg-[#121212] p-3"
               >
                 <div
-                  className={`size-14 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br ${thumbnailGradient(
-                    booking.studioId
-                  )}`}
+                  className={`size-14 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br ${thumbnailGradient(booking.studioId)}`}
                 >
                   {thumbnail && (
                     <img
                       src={thumbnail}
                       alt={studio?.title ?? "Studio"}
                       loading="lazy"
-                      onError={(event) => {
-                        event.currentTarget.style.display = "none";
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
                       }}
                       className="h-full w-full object-cover"
                     />
@@ -239,8 +207,7 @@ export default function MyBookingsPage() {
                     {studio?.title ?? "Studio booking"}
                   </p>
                   <p className="mt-1 truncate text-[12px] text-neutral-400">
-                    {booking.date} · {booking.start} to {booking.end} · {booking.hours} hrs · $
-                    {booking.total}
+                    {booking.date} · {booking.start} to {booking.end} · {booking.hours} hrs · ${booking.total}
                   </p>
                 </div>
 
@@ -252,36 +219,17 @@ export default function MyBookingsPage() {
                   </span>
 
                   {status === "pending" && (
-                    <>
-                      <button type="button" className={GHOST_BUTTON}>
-                        <Pencil className="size-3.5" aria-hidden="true" />
-                        Edit
-                      </button>
-                      <button type="button" className={DANGER_BUTTON}>
-                        <Trash2 className="size-3.5" aria-hidden="true" />
-                        Delete
-                      </button>
-                    </>
+                    <EditBooking booking={booking} onUpdated={handleUpdated} />
                   )}
 
-                  {status === "confirmed" && (
-                    <button type="button" className={PRIMARY_BUTTON}>
-                      View details
-                    </button>
+                  {(status === "pending" || status === "cancelled") && (
+                    <DeleteBooking bookingId={booking._id}
+                      studioTitle={studio?.title}
+                      onDeleted={handleDeleted} />
                   )}
 
-                  {status === "completed" && (
-                    <button type="button" className={PRIMARY_BUTTON}>
-                      Book again
-                    </button>
-                  )}
-
-                  {status === "cancelled" && (
-                    <button type="button" className={DANGER_BUTTON}>
-                      <Trash2 className="size-3.5" aria-hidden="true" />
-                      Delete
-                    </button>
-                  )}
+                  {status === "confirmed" && <button type="button" className={PRIMARY_BUTTON}>View details</button>}
+                  {status === "completed" && <button type="button" className={PRIMARY_BUTTON}>Book again</button>}
                 </div>
               </li>
             );
@@ -299,15 +247,15 @@ function BookingsSkeleton() {
       <div className="mt-3 h-4 w-72 animate-pulse rounded-md bg-white/5" />
 
       <div className="mt-6 flex flex-wrap gap-2">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="h-7 w-20 animate-pulse rounded-full bg-white/[0.06]" />
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="h-7 w-20 animate-pulse rounded-full bg-white/[0.06]" />
         ))}
       </div>
 
       <div className="mt-4 space-y-3">
-        {Array.from({ length: 3 }).map((_, index) => (
+        {Array.from({ length: 3 }).map((_, i) => (
           <div
-            key={index}
+            key={i}
             className="flex items-center gap-3.5 rounded-2xl border border-white/[0.07] bg-[#121212] p-3"
           >
             <div className="size-14 animate-pulse rounded-xl bg-white/[0.06]" />

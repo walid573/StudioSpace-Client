@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
     CalendarDays,
@@ -31,13 +32,26 @@ import { useRouter } from "next/navigation";
 const menuItemClass =
     "flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[14px] font-medium text-neutral-800 transition-colors hover:bg-neutral-100 focus-visible:bg-neutral-100 focus-visible:outline-none";
 
+const API_URL = process.env.API_URL ?? "http://localhost:8000";
+
+type Booking = { _id: string; status: string };
+
+
 const Navbar = () => {
     const pathname = usePathname();
     const router = useRouter();
+    const [bookings, setBookings] = useState<Booking[]>([]);
     const { data: session, isPending } = authClient.useSession();
     const user = session?.user;
-    // Starts at zero; replace this with the real booking count when bookings are wired up.
-    const bookingCount = 0;
+    const email = user?.email;
+    useEffect(() => {
+        if (!email) return;
+    fetch(`http://localhost:8000/my-bookings/${encodeURIComponent(email)}`)
+      .then((res) => res.json())
+      .then((data) => setBookings(data));
+  }, [email]);
+    
+    const bookingCount = bookings.length
     async function handleSignOut() {
         await authClient.signOut();
         router.replace("/");

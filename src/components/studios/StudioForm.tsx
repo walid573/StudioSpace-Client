@@ -114,12 +114,30 @@ const StudioForm = () => {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
     const result = {
       ...form,
       hourlyRate: Number(form.hourlyRate),
       securityDeposit: Number(form.securityDeposit),
       maxCapacity: Number(form.maxCapacity),
+      imageUrl: form.imageUrl,
+      gallery: [form.imageUrl].filter(Boolean),
+      slug: form.title
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "studio",
+      location: {
+        city: form.address?.split(",").at(-1)?.trim() || "Dhaka",
+        area: form.address?.split(",").slice(-2, -1)[0]?.trim() || "Gulshan",
+        address: form.address || "Dhaka, Bangladesh",
+      },
+      description: form.overview || "",
+      amenities: form.amenities,
+      hostName: form.hostName,
+      hostEmail: form.hostEmail,
     };
+
     const response = await fetch("http://localhost:8000/studios", {
       method: "POST",
       headers: {
@@ -127,7 +145,12 @@ const StudioForm = () => {
       },
       body: JSON.stringify(result),
     });
-    console.log("Studio form data:", response);
+
+    if (response.ok) {
+      console.log("Studio saved successfully:", result);
+    } else {
+      console.log("Studio save failed:", response.status, await response.text());
+    }
   }
 
   return (

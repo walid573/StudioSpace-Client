@@ -1,11 +1,17 @@
-import React from 'react';
+import StudioDetailClient, { StudioDetailSkeleton } from "@/components/studios/StudioDetailClient";
 
-const StudioDetailsPage = () => {
-    return (
-        <div className='text-white'>
-            
-        </div>
-    );
+export const instant = false;
+
+export const metadata = {
+  title: "Studio Details | StudioSpace",
 };
 
-export default StudioDetailsPage;
+export default async function StudioDetailsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  return <StudioDetailClient studioId={id} />;
+}

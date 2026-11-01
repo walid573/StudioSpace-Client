@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "../ui/button";
 import { usePathname } from "next/navigation";
 
 
@@ -48,8 +47,18 @@ const Navbar = () => {
                     })}
                 </div>
                 <div className="flex gap-2 justify-end">
-                    <Button className='bg-transparent rounded-2xl py-4 px-4 border border-[#333333] whitespace-nowrap'>Login</Button>
-                    <Button className='bg-white text-black hover:text-white rounded-3xl py-3 px-3 outline-none whitespace-nowrap'>Register</Button>
+                    <Link
+                        href="/login"
+                        className="inline-flex items-center justify-center rounded-2xl border border-[#333333] px-4 py-2 text-sm font-medium whitespace-nowrap text-white transition-colors hover:bg-white/5"
+                    >
+                        Login
+                    </Link>
+                    <Link
+                        href="/register"
+                        className="inline-flex items-center justify-center rounded-3xl bg-white px-4 py-2 text-sm font-medium whitespace-nowrap text-black transition-colors hover:bg-neutral-200"
+                    >
+                        Register
+                    </Link>
                 </div>
             </div>
         </nav>

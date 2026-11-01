@@ -143,7 +143,7 @@ const ExploreStudio = ({ studios }: { studios: Studio[] }) => {
                                         </div>
 
                                         <Link
-                                            href={`/studios/${studio.slug}`}
+                                            href={`/studios/${studio._id}`}
                                             className="mt-4 inline-flex h-10 items-center justify-center rounded-full bg-white text-[13px] font-medium text-neutral-950 transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]"
                                         >
                                             View Details

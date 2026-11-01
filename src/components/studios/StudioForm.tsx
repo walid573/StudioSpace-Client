@@ -4,7 +4,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-
+import { useRouter } from "next/navigation";
 
 const CATEGORIES = ["Photo Studio", "Film Stage", "Podcast Lounge", "Music Suite", "Workshop"];
 
@@ -95,8 +95,9 @@ function SectionCard({
 
 const StudioForm = () => {
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
-
-  
+  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState("");
 
   function update(field: keyof FormState, value: string) {
@@ -114,42 +115,53 @@ const StudioForm = () => {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setError(null);
+
+    if (!form.title.trim()) {
+      setError("Enter a studio title.");
+      return;
+    }
 
     const result = {
       ...form,
       hourlyRate: Number(form.hourlyRate),
       securityDeposit: Number(form.securityDeposit),
       maxCapacity: Number(form.maxCapacity),
-      imageUrl: form.imageUrl,
       gallery: [form.imageUrl].filter(Boolean),
-      slug: form.title
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "") || "studio",
+      slug:
+        form.title
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "") || "studio",
       location: {
         city: form.address?.split(",").at(-1)?.trim() || "Dhaka",
         area: form.address?.split(",").slice(-2, -1)[0]?.trim() || "Gulshan",
         address: form.address || "Dhaka, Bangladesh",
       },
       description: form.overview || "",
-      amenities: form.amenities,
-      hostName: form.hostName,
-      hostEmail: form.hostEmail,
     };
 
-    const response = await fetch("http://localhost:8000/studios", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(result),
-    });
+    setSubmitting(true);
 
-    if (response.ok) {
-      console.log("Studio saved successfully:", result);
-    } else {
-      console.log("Studio save failed:", response.status, await response.text());
+    try {
+      const response = await fetch("http://localhost:8000/studios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(result),
+      });
+
+      if (!response.ok) {
+        setError(`Could not save the studio (error ${response.status}). Please try again.`);
+        return;
+      }
+
+      router.push("/studios");
+      router.refresh();
+    } catch {
+      setError("Could not reach the server. Is it running on port 8000?");
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -173,7 +185,7 @@ const StudioForm = () => {
       </header>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_340px]">
-     
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <SectionCard title="Basics" subtitle="What are you listing?">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -303,8 +315,8 @@ const StudioForm = () => {
                     aria-pressed={selected}
                     onClick={() => toggleAmenity(amenity)}
                     className={`rounded-full border px-3 py-1.5 text-[12px] transition-colors ${selected
-                        ? "border-white/40 bg-white/10 text-white"
-                        : "border-white/10 text-neutral-400 hover:border-white/25 hover:text-neutral-200"
+                      ? "border-white/40 bg-white/10 text-white"
+                      : "border-white/10 text-neutral-400 hover:border-white/25 hover:text-neutral-200"
                       }`}
                   >
                     {amenity}
@@ -355,26 +367,34 @@ const StudioForm = () => {
             </div>
           </SectionCard>
 
+          {error && (
+            <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[13px] text-red-300">
+              {error}
+            </p>
+          )}
+
           <div className="flex items-center justify-end gap-3 pt-2">
             <button
               type="button"
+              onClick={() => router.back()}
               className="h-10 rounded-full px-5 text-[14px] text-neutral-300 transition-colors hover:text-white"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="h-10 rounded-full bg-white px-5 text-[14px] font-medium text-neutral-950 transition-colors hover:bg-neutral-200"
+              disabled={submitting}
+              className="h-10 rounded-full bg-white px-5 text-[14px] font-medium text-neutral-950 transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Publish studio
+              {submitting ? "Publishing..." : "Publish studio"}
             </button>
           </div>
         </form>
 
-       
+
         <aside className="hidden space-y-4 lg:sticky lg:top-6 lg:block lg:self-start">
           <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-           
+
             {preview ? (
               <img
                 src={preview}

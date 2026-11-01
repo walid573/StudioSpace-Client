@@ -5,7 +5,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { format, parseISO, startOfToday } from "date-fns";
-import { ArrowLeft, ChevronDown, Star } from "lucide-react";
+import { ArrowLeft, ChevronDown, Pencil, Star, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -14,6 +14,9 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+
 
 // Client components only see NEXT_PUBLIC_* variables
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -258,7 +261,7 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
     end: "14:00",
   });
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [dateOpen, setDateOpen] = useState(false);
   const [hoursOpen, setHoursOpen] = useState(false);
 
@@ -287,34 +290,55 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
     return { hours: diff, error: null };
   }, [booking.start, booking.end]);
 
-  async function handleBook() {
-    if (!studio) return;
-    setSubmitting(true);
-    setMessage(null);
+  const router = useRouter();
+const { data: session } = authClient.useSession();
+const user = session?.user;
 
-    try {
-      const res = await fetch(`${API_URL}/bookings`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          studioId: studio._id,
-          date: booking.date,
-          start: booking.start,
-          end: booking.end,
-          hours,
-          total: hours * studio.hourlyRate,
-        }),
-      });
 
-      if (!res.ok) throw new Error("Request failed");
-      setMessage("Status starts as Pending until the host confirms.");
-    } catch {
-      setMessage("We couldn't send your request. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
+ async function handleBook() {
+  if (!studio) return;
+
+  if (!user) {
+    router.push("/login");
+    return;
   }
 
+  setSubmitting(true);
+  setMessage(null);
+
+  try {
+    const res = await fetch(`${API_URL}/my-bookings`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        studioId: studio._id,
+        userEmail: user.email,
+        userName: user.name,
+        date: booking.date,
+        start: booking.start,
+        end: booking.end,
+        hours,
+        total: hours * studio.hourlyRate,
+      }),
+    });
+
+    if (!res.ok) throw new Error("Request failed");
+
+    setMessage({
+      type: "success",
+      text: "Request sent! Status is Pending until the host confirms.",
+    });
+
+    setTimeout(() => router.push("/my-bookings"), 1500);
+  } catch {
+    setMessage({
+      type: "error",
+      text: "We couldn't send your request. Please try again.",
+    });
+  } finally {
+    setSubmitting(false);
+  }
+}
   if (isLoading) return <StudioDetailSkeleton />;
 
   if (!studio) {
@@ -351,7 +375,7 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
       <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start lg:gap-10">
+        <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_320px] md:items-start md:gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-10">
           <div>
             <GalleryCarousel images={studio.gallery} />
 
@@ -361,9 +385,30 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
               </span>
             </div>
 
-            <h1 className="mt-3 text-[34px] leading-[1.05] font-bold tracking-[-0.04em] text-white sm:text-[42px]">
-              {studio.title}
-            </h1>
+            <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
+              <h1 className="text-[34px] leading-[1.05] font-bold tracking-[-0.04em] text-white sm:text-[42px]">
+                {studio.title}
+              </h1>
+
+              <div className="flex shrink-0 items-center gap-2 pt-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-9 gap-1.5 rounded-full border-white/15 bg-transparent px-4 text-[12px] font-medium text-neutral-200 hover:bg-white/[0.06] hover:text-white"
+                >
+                  <Pencil className="size-3.5" />
+                  Edit
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-9 gap-1.5 rounded-full border-red-500/30 bg-red-500/5 px-4 text-[12px] font-medium text-red-400 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-300"
+                >
+                  <Trash2 className="size-3.5" />
+                  Delete
+                </Button>
+              </div>
+            </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-neutral-400 sm:text-[15px]">
               <span>{locationLabel}</span>
@@ -395,7 +440,7 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
             </section>
           </div>
 
-          <aside className="lg:sticky lg:top-6">
+          <aside className="w-full self-start md:sticky md:top-6">
             <div className="rounded-[20px] border border-white/10 bg-[#111111] p-5 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
               <div className="flex items-start justify-between gap-3">
                 <p className="text-[28px] leading-none font-bold tracking-[-0.04em] text-white">
@@ -564,7 +609,7 @@ export function StudioDetailSkeleton() {
     <div className="dark min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
         <Skeleton className="h-6 w-36" />
-        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-10">
+        <div className="mt-8 grid gap-8 md:grid-cols-[minmax(0,1fr)_320px] md:gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-10">
           <div>
             <Skeleton className="aspect-[5/3] w-full rounded-2xl" />
             <div className="mt-3 grid grid-cols-4 gap-2.5 sm:gap-3">

@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { CirclePlus, Pencil, Trash2 } from "lucide-react";
+import { CirclePlus } from "lucide-react";
 import { auth } from "@/lib/auth";
+import DeleteStudioDialog from "@/components/studios/DeleteStudioDialog";
+import EditStudioDialog from "@/components/studios/EditStudioDialog";
 
 const API_URL = process.env.API_URL ?? "http://localhost:8000";
 
@@ -79,7 +81,7 @@ export default async function MyListingsPage() {
   const count = listings.length;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10 text-white sm:px-6">
+    <div className="mx-auto min-h-[60vh] max-w-5xl px-4 py-10 text-white sm:px-6">
       <header className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-[26px] font-bold tracking-[-0.02em] sm:text-[28px]">
@@ -141,9 +143,8 @@ export default async function MyListingsPage() {
                   const place =
                     [listing.location?.area, listing.location?.city].filter(Boolean).join(", ") ||
                     "—";
-                  const thumbnail = listing.imageUrl?.startsWith("http")
-                    ? listing.imageUrl
-                    : undefined;
+                  // Plain <img>, so base64 (`data:`) uploads render too.
+                  const thumbnail = listing.imageUrl?.trim() || undefined;
 
                   return (
                     <tr key={listing._id} className="transition-colors hover:bg-white/[0.02]">
@@ -197,14 +198,16 @@ export default async function MyListingsPage() {
 
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
-                          <button type="button" className={GHOST_BUTTON}>
-                            <Pencil className="size-3.5" aria-hidden="true" />
-                            Update
-                          </button>
-                          <button type="button" className={DANGER_BUTTON}>
-                            <Trash2 className="size-3.5" aria-hidden="true" />
-                            Delete
-                          </button>
+                          <EditStudioDialog
+                            studio={listing}
+                            label="Update"
+                            triggerClassName={GHOST_BUTTON}
+                          />
+                          <DeleteStudioDialog
+                            studioId={listing._id}
+                            studioTitle={listing.title}
+                            triggerClassName={DANGER_BUTTON}
+                          />
                         </div>
                       </td>
                     </tr>

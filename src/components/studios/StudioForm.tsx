@@ -6,6 +6,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { isImageSource } from "@/lib/images";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 const CATEGORIES = ["Photo Studio", "Film Stage", "Podcast Lounge", "Music Suite", "Workshop"];
 
@@ -137,12 +140,19 @@ const StudioForm = () => {
       address: form.address.trim(),
     };
 
+    // Only store something the browser can actually render as an image. A typo in
+    // this field used to be saved verbatim and then crashed `next/image` later.
+    const coverImage = isImageSource(form.imageUrl) ? form.imageUrl.trim() : "";
+
     const result = {
       ...form,
+      hostName: hostName.trim() || null,
+      hostEmail: hostEmail.trim().toLowerCase() || null,
+      imageUrl: coverImage,
       hourlyRate: Number(form.hourlyRate),
       securityDeposit: Number(form.securityDeposit),
       maxCapacity: Number(form.maxCapacity),
-      gallery: [form.imageUrl].filter(Boolean),
+      gallery: coverImage ? [coverImage] : [],
       slug:
         form.title
           .trim()
@@ -156,7 +166,7 @@ const StudioForm = () => {
     setSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:8000/studios", {
+      const response = await fetch(`${API_URL}/studios`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(result),

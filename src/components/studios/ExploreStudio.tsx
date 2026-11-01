@@ -4,7 +4,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Search, SearchX } from "lucide-react";
 
 
 export type Studio = {
@@ -91,9 +91,39 @@ const ExploreStudio = ({ studios }: { studios: Studio[] }) => {
                 </div>
 
                 {visibleStudios.length === 0 ? (
-                    <p className="mt-16 text-center text-[14px] text-neutral-400">
-                        No studios match your filters.
-                    </p>
+                    <div className="mt-10 flex flex-col items-center justify-center rounded-2xl border border-white/[0.07] bg-[#121212] px-6 py-16 text-center">
+                        <div className="flex size-12 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]">
+                            <SearchX className="size-5 text-neutral-400" aria-hidden="true" />
+                        </div>
+                        <p className="mt-4 text-[15px] font-semibold text-white">
+                            {studios.length === 0 ? "No studios yet" : "No studios match your search"}
+                        </p>
+                        <p className="mt-1.5 max-w-xs text-[13px] text-neutral-400">
+                            {studios.length === 0
+                                ? "Nothing has been published here yet. Check back soon, or list your own space."
+                                : "Try a different keyword, another category, or clear the filters to see every space."}
+                        </p>
+                        <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+                            {studios.length > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setQuery("");
+                                        setCategory("All");
+                                    }}
+                                    className="inline-flex h-9 items-center rounded-full bg-white px-4 text-[12px] font-medium text-neutral-950 transition-colors hover:bg-neutral-200 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#121212] focus-visible:outline-none"
+                                >
+                                    Clear filters
+                                </button>
+                            )}
+                            <Link
+                                href="/add-studio"
+                                className="inline-flex h-9 items-center rounded-full border border-white/15 px-4 text-[12px] font-medium text-neutral-200 transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+                            >
+                                List your studio
+                            </Link>
+                        </div>
+                    </div>
                 ) : (
                     <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {visibleStudios.map((studio) => {
@@ -107,15 +137,21 @@ const ExploreStudio = ({ studios }: { studios: Studio[] }) => {
                                     className="group flex flex-col overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]"
                                 >
                                     <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-neutral-800 via-neutral-900 to-black">
-                                        <img
-                                            src={studio.imageUrl}
-                                            alt={studio.title}
-                                            loading="lazy"
-                                            onError={(event) => {
-                                            event.currentTarget.style.display = "none";
-                                            }}
-                                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                                        />
+                                        {studio.imageUrl ? (
+                                            <img
+                                                src={studio.imageUrl}
+                                                alt={studio.title}
+                                                loading="lazy"
+                                                onError={(event) => {
+                                                    event.currentTarget.style.display = "none";
+                                                }}
+                                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                                            />
+                                        ) : (
+                                            <div className="flex h-full items-center justify-center text-[12px] text-neutral-500">
+                                                No photo yet
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex flex-1 flex-col p-4">

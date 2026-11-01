@@ -5,7 +5,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { format, parseISO, startOfToday } from "date-fns";
-import { ArrowLeft, ChevronDown, Pencil, Star, Trash2 } from "lucide-react";
+import { ChevronDown, Compass, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -16,6 +16,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { isImageSource } from "@/lib/images";
+import DeleteStudioDialog from "@/components/studios/DeleteStudioDialog";
+import EditStudioDialog, { type EditableStudio } from "@/components/studios/EditStudioDialog";
 
 
 // Client components only see NEXT_PUBLIC_* variables
@@ -36,6 +39,7 @@ export type Studio = {
   gallery: string[];
   amenities: string[];
   specs: { label: string; value: string }[];
+  ownerEmail?: string;
   host: {
     name: string;
     avatar: string;
@@ -65,39 +69,6 @@ const DEFAULT_REVIEWS = [
     text: "The room feels huge and the natural light is fantastic. Great for small team shoots and client meetings.",
   },
 ];
-
-// Only used in development so a broken API is obvious in production
-const fallbackStudio: Studio = {
-  _id: "fallback-cyclorama-white-loft",
-  slug: "cyclorama-white-loft",
-  title: "Cyclorama White Loft",
-  category: "Photo Studio",
-  hourlyRate: 45,
-  securityDeposit: 100,
-  rating: 4.9,
-  reviewCount: 128,
-  location: { city: "Dhaka", area: "Gulshan", address: "Gulshan, Dhaka" },
-  capacity: "Up to 12 people",
-  description:
-    "A seamless white cyc wall with a full white backdrop, ideal for product, fashion, and portrait shoots.",
-  gallery: [
-    "linear-gradient(135deg, #3a8bc2 0%, #2e5d93 40%, #173f66 100%)",
-    "linear-gradient(135deg, #4b6a8a 0%, #2a3d59 100%)",
-    "linear-gradient(135deg, #394d66 0%, #1f2b3d 100%)",
-    "linear-gradient(135deg, #1d4b7b 0%, #0c2037 100%)",
-  ],
-  amenities: ["Natural light", "Wi-Fi", "Backdrops", "Soundproofing", "Parking", "Green room"],
-  specs: DEFAULT_SPECS,
-  host: {
-    name: "Rahim Ahmed",
-    avatar:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
-    title: "Verified host",
-    responseTime: "Usually replies in 1 hour",
-    joined: "Joined in 2021",
-  },
-  reviews: DEFAULT_REVIEWS,
-};
 
 async function getStudio(studioId: string): Promise<any | null> {
   const safeId = encodeURIComponent(decodeURIComponent(studioId).trim());
@@ -133,12 +104,25 @@ function normalizeCapacity(value: unknown): string {
   return "Up to 12 people";
 }
 
+const isGradient = (value: string) =>
+  value.startsWith("linear-gradient") || value.startsWith("radial-gradient");
+
+const DEFAULT_GALLERY =
+  "linear-gradient(135deg, #3a8bc2 0%, #2e5d93 40%, #173f66 100%)";
+
 function transformStudio(api: any): Studio {
-  const gallery = Array.isArray(api.gallery)
-    ? api.gallery.filter(Boolean)
+  const gallerySources: unknown[] = Array.isArray(api.gallery)
+    ? api.gallery
     : Array.isArray(api.images)
-      ? api.images.filter(Boolean)
-      : [api.imageUrl, api.coverImage].filter(Boolean);
+      ? api.images
+      : [api.imageUrl, api.coverImage];
+
+  // Drop anything next/image cannot render (empty strings, free text such as
+  // "DASDAS", …) so one bad database value cannot crash the detail page.
+  const gallery = gallerySources
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim())
+    .filter((value) => isGradient(value) || isImageSource(value));
 
   return {
     _id: api._id,
@@ -156,9 +140,10 @@ function transformStudio(api: any): Studio {
     },
     capacity: normalizeCapacity(api.capacity ?? api.maxCapacity),
     description: api.description ?? api.overview ?? "",
-    gallery: gallery.length ? gallery : ["linear-gradient(135deg, #3a8bc2 0%, #2e5d93 40%, #173f66 100%)"],
+    gallery: gallery.length ? gallery : [DEFAULT_GALLERY],
     amenities: api.amenities ?? [],
     specs: api.specs ?? DEFAULT_SPECS,
+    ownerEmail: api.ownerEmail ?? api.hostEmail,
     host: {
       name: api.hostName ?? api.ownerName ?? "Host",
       avatar: api.hostAvatar ?? api.ownerAvatar ?? "",
@@ -169,9 +154,6 @@ function transformStudio(api: any): Studio {
     reviews: api.reviews ?? DEFAULT_REVIEWS,
   };
 }
-
-const isGradient = (value: string) =>
-  value.startsWith("linear-gradient") || value.startsWith("radial-gradient");
 
 function toMinutes(time: string) {
   const [h, m] = time.split(":").map(Number);
@@ -193,13 +175,19 @@ function GalleryCarousel({ images }: { images: string[] }) {
             className="aspect-[5/3] w-full"
             style={{ background: current }}
           />
-        ) : (
+        ) : isImageSource(current) ? (
           <Image
             src={current}
             alt="Studio gallery preview"
             width={300}
             height={300}
             className="aspect-[5/3] w-full object-cover"
+          />
+        ) : (
+          <div
+            role="img"
+            aria-label="Studio gallery preview"
+            className="aspect-[5/3] w-full bg-gradient-to-br from-neutral-800 via-neutral-900 to-black"
           />
         )}
       </div>
@@ -222,8 +210,10 @@ function GalleryCarousel({ images }: { images: string[] }) {
             >
               {isGradient(image) ? (
                 <div className="size-full" style={{ background: image }} />
-              ) : (
+              ) : isImageSource(image) ? (
                 <img src={image} alt="" className="size-full object-cover" />
+              ) : (
+                <div className="size-full bg-white/5" />
               )}
             </button>
           );
@@ -253,6 +243,8 @@ function formatHoursLabel(hours: number) {
 
 export default function StudioDetailClient({ studioId }: { studioId: string }) {
   const [studio, setStudio] = useState<Studio | null>(null);
+  const [rawStudio, setRawStudio] = useState<EditableStudio | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [booking, setBooking] = useState<BookingState>({
     date: "2026-11-12",
@@ -270,15 +262,20 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
       setIsLoading(true);
       const api = await getStudio(studioId);
       if (cancelled) return;
-      if (api) setStudio(transformStudio(api));
-      else setStudio(process.env.NODE_ENV === "development" ? fallbackStudio : null);
+      if (api) {
+        setStudio(transformStudio(api));
+        setRawStudio(api as EditableStudio);
+      } else {
+        setStudio(null);
+        setRawStudio(null);
+      }
       setIsLoading(false);
     }
     load();
     return () => {
       cancelled = true;
     };
-  }, [studioId]);
+  }, [studioId, refreshKey]);
 
   const { hours, error } = useMemo(() => {
     const diff = (toMinutes(booking.end) - toMinutes(booking.start)) / 60;
@@ -293,8 +290,7 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
   const { data: session } = authClient.useSession();
   const user = session?.user;
 
-
-  async function handleBook() {
+  const handleBook = async ()=> {
     if (!studio) return;
 
     if (!user) {
@@ -342,25 +338,32 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
 
   if (!studio) {
     return (
-      <div className="dark min-h-screen bg-background text-foreground">
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-          <Link
-            href="/studios"
-            className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm text-muted-foreground transition hover:text-foreground"
-          >
-            <ArrowLeft className="size-4" />
-            Back to studios
-          </Link>
-          <div className="mt-8 text-center">
-            <h1 className="text-2xl font-bold">Studio not found</h1>
-            <p className="mt-2 text-muted-foreground">
-              This studio doesn&apos;t exist or has been removed.
-            </p>
+      <div className="min-h-screen bg-[#0A0A0A] text-white">
+        <div className="mx-auto flex max-w-2xl flex-col items-center px-4 py-24 text-center sm:px-6">
+          <div className="flex size-14 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]">
+            <Compass className="size-6 text-neutral-400" aria-hidden="true" />
+          </div>
+
+          <h1 className="mt-5 text-[24px] font-bold tracking-[-0.02em] text-white sm:text-[26px]">
+            Studio not found
+          </h1>
+          <p className="mt-2 max-w-sm text-[14px] leading-6 text-neutral-400">
+            This studio doesn&apos;t exist, or the link is broken. Browse the spaces we have and find
+            one that fits your shoot.
+          </p>
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/studios"
-              className="mt-4 inline-flex items-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+              className="inline-flex h-10 items-center rounded-full bg-white px-5 text-[13px] font-semibold text-neutral-950 transition-colors hover:bg-neutral-200 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A] focus-visible:outline-none"
             >
               Browse all studios
+            </Link>
+            <Link
+              href="/"
+              className="inline-flex h-10 items-center rounded-full border border-white/15 px-5 text-[13px] font-medium text-neutral-200 transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+            >
+              Back to home
             </Link>
           </div>
         </div>
@@ -370,6 +373,7 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
 
   const locationLabel = [studio.location.area, studio.location.city].filter(Boolean).join(", ");
   const total = Math.round(hours * studio.hourlyRate * 100) / 100;
+  const canManage = Boolean(user);
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
@@ -389,24 +393,23 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
                 {studio.title}
               </h1>
 
-              <div className="flex shrink-0 items-center gap-2 pt-1">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-9 gap-1.5 rounded-full border-white/15 bg-transparent px-4 text-[12px] font-medium text-neutral-200 hover:bg-white/[0.06] hover:text-white"
-                >
-                  <Pencil className="size-3.5" />
-                  Edit
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-9 gap-1.5 rounded-full border-red-500/30 bg-red-500/5 px-4 text-[12px] font-medium text-red-400 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-300"
-                >
-                  <Trash2 className="size-3.5" />
-                  Delete
-                </Button>
-              </div>
+              {canManage && (
+                <div className="flex shrink-0 items-center gap-2 pt-1">
+                  {rawStudio && (
+                    <EditStudioDialog
+                      studio={rawStudio}
+                      triggerClassName="inline-flex h-9 items-center gap-1.5 rounded-full border border-white/15 bg-transparent px-4 text-[12px] font-medium text-neutral-200 transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+                      onUpdated={() => setRefreshKey((key) => key + 1)}
+                    />
+                  )}
+                  <DeleteStudioDialog
+                    studioId={studio._id}
+                    studioTitle={studio.title}
+                    redirectTo="/my-listings"
+                    triggerClassName="inline-flex h-9 items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/5 px-4 text-[12px] font-medium text-red-400 transition-colors hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-300 focus-visible:ring-2 focus-visible:ring-red-400/60 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-neutral-400 sm:text-[15px]">

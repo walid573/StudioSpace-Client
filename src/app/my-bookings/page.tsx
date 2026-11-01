@@ -150,7 +150,7 @@ export default function MyBookingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 text-white sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 py-10 text-white sm:px-6">
       <header className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-[26px] font-bold tracking-[-0.02em]">My bookings</h1>
@@ -209,7 +209,7 @@ export default function MyBookingsPage() {
             const status = toStatus(booking.status);
             const meta = STATUS_META[status];
             const studio = studiosById.get(booking.studioId);
-            const thumbnail = studio?.imageUrl?.startsWith("http") ? studio.imageUrl : undefined;
+            const thumbnail = studio?.imageUrl?.trim() || undefined;
 
             return (
               <li

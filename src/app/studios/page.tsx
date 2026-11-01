@@ -3,6 +3,7 @@ import ExploreStudio, {
     ExploreStudioSkeleton,
     type Studio,
 } from "@/components/studios/ExploreStudio";
+import { toDisplayImage } from "@/lib/images";
 
 export const metadata = {
     title: "Explore Studios | StudioSpace",
@@ -21,16 +22,13 @@ async function getStudios(): Promise<Studio[]> {
 
     const studios: Studio[] = await res.json();
 
+    // Only skip documents that are too incomplete to render. A missing photo is
+    // fine — the card falls back to a placeholder instead of hiding the studio.
     return studios
-        .filter(
-            (studio) =>
-                studio.title && studio.category && studio.imageUrl?.startsWith("http")
-        )
+        .filter((studio) => Boolean(studio.title && studio.category))
         .map((studio) => ({
             ...studio,
-            imageUrl: studio.imageUrl.includes("?")
-                ? studio.imageUrl
-                : `${studio.imageUrl}?auto=format&fit=crop&w=800&q=80`,
+            imageUrl: toDisplayImage(studio.imageUrl),
         }));
 }
 

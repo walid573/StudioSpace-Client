@@ -215,11 +215,10 @@ function GalleryCarousel({ images }: { images: string[] }) {
               onClick={() => setSelected(index)}
               aria-label={`Show gallery image ${index + 1}`}
               aria-pressed={active}
-              className={`aspect-[5/3] overflow-hidden rounded-lg border p-0 transition duration-200 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none ${
-                active
+              className={`aspect-[5/3] overflow-hidden rounded-lg border p-0 transition duration-200 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none ${active
                   ? "border-white/60 opacity-100"
                   : "border-white/10 opacity-50 hover:opacity-90"
-              }`}
+                }`}
             >
               {isGradient(image) ? (
                 <div className="size-full" style={{ background: image }} />
@@ -291,54 +290,54 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
   }, [booking.start, booking.end]);
 
   const router = useRouter();
-const { data: session } = authClient.useSession();
-const user = session?.user;
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
 
 
- async function handleBook() {
-  if (!studio) return;
+  async function handleBook() {
+    if (!studio) return;
 
-  if (!user) {
-    router.push("/login");
-    return;
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    setSubmitting(true);
+    setMessage(null);
+
+    try {
+      const res = await fetch(`${API_URL}/my-bookings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studioId: studio._id,
+          userEmail: user.email,
+          userName: user.name,
+          date: booking.date,
+          start: booking.start,
+          end: booking.end,
+          hours,
+          total: hours * studio.hourlyRate,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Request failed");
+
+      setMessage({
+        type: "success",
+        text: "Request sent! Status is Pending until the host confirms.",
+      });
+
+      setTimeout(() => router.push("/my-bookings"), 1500);
+    } catch {
+      setMessage({
+        type: "error",
+        text: "We couldn't send your request. Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   }
-
-  setSubmitting(true);
-  setMessage(null);
-
-  try {
-    const res = await fetch(`${API_URL}/my-bookings`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        studioId: studio._id,
-        userEmail: user.email,
-        userName: user.name,
-        date: booking.date,
-        start: booking.start,
-        end: booking.end,
-        hours,
-        total: hours * studio.hourlyRate,
-      }),
-    });
-
-    if (!res.ok) throw new Error("Request failed");
-
-    setMessage({
-      type: "success",
-      text: "Request sent! Status is Pending until the host confirms.",
-    });
-
-    setTimeout(() => router.push("/my-bookings"), 1500);
-  } catch {
-    setMessage({
-      type: "error",
-      text: "We couldn't send your request. Please try again.",
-    });
-  } finally {
-    setSubmitting(false);
-  }
-}
   if (isLoading) return <StudioDetailSkeleton />;
 
   if (!studio) {
@@ -463,9 +462,8 @@ const user = session?.user;
                     <PopoverTrigger id="booking-date" className={FIELD_TRIGGER_CLASS}>
                       <span>{formatDateLabel(booking.date)}</span>
                       <ChevronDown
-                        className={`size-3.5 shrink-0 text-neutral-500 transition-transform duration-200 ${
-                          dateOpen ? "rotate-180" : ""
-                        }`}
+                        className={`size-3.5 shrink-0 text-neutral-500 transition-transform duration-200 ${dateOpen ? "rotate-180" : ""
+                          }`}
                       />
                     </PopoverTrigger>
                     <PopoverContent
@@ -497,9 +495,8 @@ const user = session?.user;
                         {booking.start} to {booking.end}
                       </span>
                       <ChevronDown
-                        className={`size-3.5 shrink-0 text-neutral-500 transition-transform duration-200 ${
-                          hoursOpen ? "rotate-180" : ""
-                        }`}
+                        className={`size-3.5 shrink-0 text-neutral-500 transition-transform duration-200 ${hoursOpen ? "rotate-180" : ""
+                          }`}
                       />
                     </PopoverTrigger>
                     <PopoverContent
@@ -578,8 +575,14 @@ const user = session?.user;
               )}
 
               {message && (
-                <p className="mt-3 text-[13px] text-neutral-300" role="status">
-                  {message}
+                <p
+                  role="status"
+                  className={`rounded-lg border px-3 py-2 text-[13px] ${message.type === "success"
+                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                      : "border-red-500/30 bg-red-500/10 text-red-300"
+                    }`}
+                >
+                  {message.text}
                 </p>
               )}
 

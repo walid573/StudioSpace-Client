@@ -5,6 +5,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 const CATEGORIES = ["Photo Studio", "Film Stage", "Podcast Lounge", "Music Suite", "Workshop"];
 
@@ -33,8 +34,8 @@ type FormState = {
   imageUrl: string;
   amenities: string[];
   overview: string;
-  hostName: string;
-  hostEmail: string;
+  hostName: string | null;
+  hostEmail: string | null;
 };
 
 const INITIAL_FORM: FormState = {
@@ -47,8 +48,8 @@ const INITIAL_FORM: FormState = {
   imageUrl: "",
   amenities: ["Professional lighting", "Soundproofing", "Air conditioning", "Makeup station"],
   overview: "",
-  hostName: "Rahim Ahmed",
-  hostEmail: "rahim@example.com",
+  hostName: null,
+  hostEmail: null,
 };
 
 
@@ -99,6 +100,10 @@ const StudioForm = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState("");
+  const { data: session } = authClient.useSession();
+
+  const hostName = form.hostName ?? session?.user?.name ?? "";
+  const hostEmail = form.hostEmail ?? session?.user?.email ?? "";
 
   function update(field: keyof FormState, value: string) {
     setForm((previous) => ({ ...previous, [field]: value }));
@@ -121,6 +126,16 @@ const StudioForm = () => {
       setError("Enter a studio title.");
       return;
     }
+    const parts = form.address
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean);
+
+    const location = {
+      city: parts.length > 1 ? parts[parts.length - 1] : "",
+      area: parts.length > 1 ? parts[parts.length - 2] : parts[0] ?? "",
+      address: form.address.trim(),
+    };
 
     const result = {
       ...form,
@@ -134,11 +149,7 @@ const StudioForm = () => {
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/^-+|-+$/g, "") || "studio",
-      location: {
-        city: form.address?.split(",").at(-1)?.trim() || "Dhaka",
-        area: form.address?.split(",").slice(-2, -1)[0]?.trim() || "Gulshan",
-        address: form.address || "Dhaka, Bangladesh",
-      },
+      location,
       description: form.overview || "",
     };
 
@@ -351,7 +362,7 @@ const StudioForm = () => {
               <Field label="Host name">
                 <input
                   className={inputClass}
-                  value={form.hostName}
+                  value={hostName}
                   onChange={(event) => update("hostName", event.target.value)}
                 />
               </Field>
@@ -360,7 +371,7 @@ const StudioForm = () => {
                 <input
                   type="email"
                   className={inputClass}
-                  value={form.hostEmail}
+                  value={hostEmail}
                   onChange={(event) => update("hostEmail", event.target.value)}
                 />
               </Field>

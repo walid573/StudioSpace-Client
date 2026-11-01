@@ -323,7 +323,7 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
         type: "success",
         text: "Request sent! Status is Pending until the host confirms.",
       });
-
+      router.refresh()
       setTimeout(() => router.push("/my-bookings"), 1500);
     } catch {
       setMessage({

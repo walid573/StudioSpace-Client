@@ -219,7 +219,7 @@ export default function MyBookingsPage() {
                   </span>
 
                   {status === "pending" && (
-                    <EditBooking booking={booking} onUpdated={handleUpdated} />
+                    <EditBooking booking={booking} studioTitle={studio?.title}  onUpdated={handleUpdated} />
                   )}
 
                   {(status === "pending" || status === "cancelled") && (

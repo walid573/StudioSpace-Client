@@ -44,13 +44,17 @@ const Navbar = () => {
     const { data: session, isPending } = authClient.useSession();
     const user = session?.user;
     const email = user?.email;
-    useEffect(() => {
+    function loadBookings() {
         if (!email) return;
-    fetch(`http://localhost:8000/my-bookings/${encodeURIComponent(email)}`)
-      .then((res) => res.json())
-      .then((data) => setBookings(data));
-  }, [email]);
-    
+        fetch(`http://localhost:8000/my-bookings/${encodeURIComponent(email)}`, { cache: "no-store" })
+            .then((res) => res.json())
+            .then((data) => setBookings(Array.isArray(data) ? data : []));
+    }
+
+    useEffect(() => {
+        loadBookings();
+    }, [email]);
+
     const bookingCount = bookings.length
     async function handleSignOut() {
         await authClient.signOut();
@@ -99,7 +103,7 @@ const Navbar = () => {
                             className="size-9 animate-pulse rounded-full bg-white/10"
                         />
                     ) : user ? (
-                        <Popover>
+                        <Popover onOpenChange={(open) => open && loadBookings()}>
                             <PopoverTrigger
                                 aria-label="Open account menu"
                                 className="cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/40"
@@ -147,13 +151,13 @@ const Navbar = () => {
                                     <button type="button" className={menuItemClass}>
                                         <LayoutGrid className="size-[18px] shrink-0 text-neutral-600" strokeWidth={1.8} />
                                         <Link href={'/dashboard'}>Dashboard</Link>
-                                        
+
                                     </button>
 
                                     <button type="button" className={menuItemClass}>
                                         <CirclePlus className="size-[18px] shrink-0 text-neutral-600" strokeWidth={1.8} />
                                         <Link href={'/add-studio'}>Add New Studio</Link>
-                                        
+
                                     </button>
 
                                     <button type="button" className={menuItemClass}>

@@ -7,6 +7,7 @@ import HeroSlide from "@/components/home/HeroSlide";
 import HowItWorks from "@/components/home/HowItWorks";
 import { slides } from "@/components/home/slides";
 
+export const instant = false;
 
 export default function Home() {
   return (

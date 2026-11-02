@@ -25,7 +25,7 @@ export default async function LoginPage({
   const params = await searchParams;
 
   return (
-    <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-[#0A0A0A] px-4 py-12 text-white sm:px-6 sm:py-16">
+    <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-background px-4 py-12 text-foreground sm:px-6 sm:py-16">
       <LoginForm
         redirectTo={safeRedirect(params.redirect)}
         registered={params.registered === "1"}

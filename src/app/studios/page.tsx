@@ -12,6 +12,7 @@ export const metadata = {
 
 const API_URL = process.env.API_URL ?? "http://localhost:8000";
 
+export const instant = false;
 
 async function getStudios(): Promise<Studio[]> {
     const res = await fetch(`${API_URL}/studios`, { cache: "no-store" });

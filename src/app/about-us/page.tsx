@@ -36,38 +36,38 @@ const VALUES = [
 ];
 
 const PRIMARY_BUTTON =
-  "inline-flex h-9 items-center rounded-full bg-white px-4 text-[12px] font-medium text-neutral-950 transition-colors hover:bg-neutral-200 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A] focus-visible:outline-none";
+  "inline-flex h-9 items-center rounded-full bg-primary px-4 text-[12px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 const SECONDARY_BUTTON =
-  "inline-flex h-9 items-center rounded-full border border-white/15 px-4 text-[12px] font-medium text-neutral-200 transition-colors hover:border-white/30 hover:bg-white/[0.06] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A] focus-visible:outline-none";
+  "inline-flex h-9 items-center rounded-full border border-border bg-background px-4 text-[12px] font-medium text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 
 export default function AboutUsPage() {
   return (
-    <div className="bg-[#0A0A0A] text-white">
+    <div className="bg-background text-foreground">
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <section>
-          <span className="inline-flex items-center rounded-full border border-white/15 bg-white/[0.04] px-3 py-1 text-[11px] font-medium text-neutral-300">
+          <span className="inline-flex items-center rounded-full border border-border bg-muted px-3 py-1 text-[11px] font-medium text-muted-foreground">
             About StudioSpace
           </span>
 
-          <h1 className="mt-5 max-w-3xl text-[30px] leading-[1.08] font-bold tracking-[-0.03em] text-white sm:text-[40px] lg:text-[48px]">
+          <h1 className="mt-5 max-w-3xl text-[30px] leading-[1.08] font-bold tracking-[-0.03em] text-foreground sm:text-[40px] lg:text-[48px]">
             We help creators find the room where great work happens.
           </h1>
 
-          <p className="mt-4 max-w-2xl text-[13.5px] leading-relaxed text-neutral-400 sm:text-[15px]">
+          <p className="mt-4 max-w-2xl text-[13.5px] leading-relaxed text-muted-foreground sm:text-[15px]">
             StudioSpace is a peer-to-peer marketplace for photo studios, sound stages, podcast
             rooms, music suites and art workshops. We connect people who make things with people
             who have the space to make them in.
           </p>
 
-          <dl className="mt-10 grid grid-cols-2 gap-y-6 border-y border-white/10 py-6 sm:grid-cols-4 sm:gap-y-0 sm:divide-x sm:divide-white/10">
+          <dl className="mt-10 grid grid-cols-2 gap-y-6 border-y border-border py-6 sm:grid-cols-4 sm:gap-y-0 sm:divide-x sm:divide-border">
             {STATS.map((stat) => (
               <div key={stat.label} className="sm:px-6 sm:first:pl-0 sm:last:pr-0">
-                <dt className="text-[26px] leading-none font-bold tracking-[-0.03em] text-white sm:text-[30px]">
+                <dt className="text-[26px] leading-none font-bold tracking-[-0.03em] text-foreground sm:text-[30px]">
                   {stat.value}
                 </dt>
-                <dd className="mt-1.5 text-[11px] text-neutral-400 sm:text-[12px]">
+                <dd className="mt-1.5 text-[11px] text-muted-foreground sm:text-[12px]">
                   {stat.label}
                 </dd>
               </div>
@@ -75,19 +75,19 @@ export default function AboutUsPage() {
           </dl>
         </section>
 
-        <section className="grid gap-6 border-b border-white/10 py-10 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:gap-16 lg:py-14">
+        <section className="grid gap-6 border-b border-border py-10 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:gap-16 lg:py-14">
           <div>
-            <p className="text-[10px] font-medium tracking-[0.18em] text-neutral-500 uppercase">
+            <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
               Our story
             </p>
-            <h2 className="mt-3 text-[22px] leading-[1.15] font-bold tracking-[-0.02em] text-white sm:text-[26px]">
+            <h2 className="mt-3 text-[22px] leading-[1.15] font-bold tracking-[-0.02em] text-foreground sm:text-[26px]">
               Why we built StudioSpace
             </h2>
           </div>
 
           <div className="space-y-3.5">
             {STORY.map((paragraph) => (
-              <p key={paragraph} className="text-[13px] leading-relaxed text-neutral-400 sm:text-[13.5px]">
+              <p key={paragraph} className="text-[13px] leading-relaxed text-muted-foreground sm:text-[13.5px]">
                 {paragraph}
               </p>
             ))}
@@ -95,10 +95,10 @@ export default function AboutUsPage() {
         </section>
 
         <section className="py-10 lg:py-14">
-          <p className="text-[10px] font-medium tracking-[0.18em] text-neutral-500 uppercase">
+          <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
             What we believe
           </p>
-          <h2 className="mt-3 text-[26px] font-bold tracking-[-0.02em] text-white sm:text-[30px]">
+          <h2 className="mt-3 text-[26px] font-bold tracking-[-0.02em] text-foreground sm:text-[30px]">
             Our values
           </h2>
 
@@ -106,26 +106,26 @@ export default function AboutUsPage() {
             {VALUES.map((value, index) => (
               <div
                 key={value.title}
-                className={index === 0 ? "sm:pr-6" : "sm:border-l sm:border-white/10 sm:px-6"}
+                className={index === 0 ? "sm:pr-6" : "sm:border-l sm:border-border sm:px-6"}
               >
                 <p className="text-[10px] font-semibold text-blue-500">
                   {String(index + 1).padStart(2, "0")}
                 </p>
-                <h3 className="mt-1.5 text-[14px] font-semibold tracking-[-0.01em] text-white">
+                <h3 className="mt-1.5 text-[14px] font-semibold tracking-[-0.01em] text-foreground">
                   {value.title}
                 </h3>
-                <p className="mt-1.5 text-[12px] leading-relaxed text-neutral-400">
+                <p className="mt-1.5 text-[12px] leading-relaxed text-muted-foreground">
                   {value.body}
                 </p>
               </div>
             ))}
           </div>
            <section className="pt-30 ">
-          <div className="relative mx-auto max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-[#0B0B0B] bg-[radial-gradient(120%_140%_at_25%_0%,rgba(37,99,235,0.28),transparent_55%)] px-6 py-10 text-center sm:py-12">
-            <h2 className="text-[22px] font-bold tracking-[-0.02em] text-white sm:text-[26px]">
+          <div className="relative mx-auto max-w-5xl overflow-hidden rounded-2xl border border-border bg-card bg-[radial-gradient(120%_140%_at_25%_0%,rgba(37,99,235,0.28),transparent_55%)] px-6 py-10 text-center sm:py-12">
+            <h2 className="text-[22px] font-bold tracking-[-0.02em] text-foreground sm:text-[26px]">
               Ready to book your first space?
             </h2>
-            <p className="mx-auto mt-2 max-w-sm text-[12.5px] leading-relaxed text-neutral-400">
+            <p className="mx-auto mt-2 max-w-sm text-[12.5px] leading-relaxed text-muted-foreground">
               Browse studios near you and reserve your hours today.
             </p>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">

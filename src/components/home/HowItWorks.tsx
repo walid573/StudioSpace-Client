@@ -29,16 +29,16 @@ const steps = [
 
 const HowItWorks = () => {
     return (
-        <section className="bg-[#0A0A0A] text-white">
+        <section className="bg-background text-foreground">
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-                <span className="inline-flex items-center rounded-full border border-white/15 px-3 py-1 text-[11px] text-neutral-300">
+                <span className="inline-flex items-center rounded-full border border-border px-3 py-1 text-[11px] text-muted-foreground">
                     How it works
                 </span>
 
-                <h2 className="mt-4 text-[26px] font-bold tracking-[-0.02em] text-white sm:text-[28px]">
+                <h2 className="mt-4 text-[26px] font-bold tracking-[-0.02em] text-foreground sm:text-[28px]">
                     Book a studio in four steps
                 </h2>
-                <p className="mt-2 text-[15px] text-neutral-400">
+                <p className="mt-2 text-[15px] text-muted-foreground">
                     From first search to the final take, everything happens in one place.
                 </p>
 
@@ -46,25 +46,25 @@ const HowItWorks = () => {
                     {steps.map(({ number, title, description, icon: Icon }) => (
                         <div
                             key={number}
-                            className="rounded-xl border border-white/10 bg-white/5 p-5"
+                            className="rounded-xl border border-border bg-accent p-5"
                         >
                             <div className="flex items-center justify-between">
-                                <span className="flex size-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04]">
+                                <span className="flex size-9 items-center justify-center rounded-lg border border-border bg-muted">
                                     <Icon
                                         aria-hidden="true"
                                         strokeWidth={1.5}
-                                        className="size-4 text-blue-400"
+                                        className="size-4  text-blue-400"
                                     />
                                 </span>
-                                <span className="text-[11px] font-medium text-neutral-500">
+                                <span className="text-[11px] font-medium text-muted-foreground">
                                     {number}
                                 </span>
                             </div>
 
-                            <h3 className="mt-5 text-[15px] font-semibold text-white">
+                            <h3 className="mt-5 text-[15px] font-semibold text-foreground">
                                 {title}
                             </h3>
-                            <p className="mt-1.5 text-[13px] leading-relaxed text-neutral-400">
+                            <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
                                 {description}
                             </p>
                         </div>

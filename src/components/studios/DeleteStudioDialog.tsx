@@ -86,10 +86,10 @@ export default function DeleteStudioDialog({
         {label}
       </AlertDialogTrigger>
 
-      <AlertDialogContent className="dark border border-white/10 bg-[#111111] text-white">
+      <AlertDialogContent className="border border-border bg-popover text-foreground">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-white">Delete this studio?</AlertDialogTitle>
-          <AlertDialogDescription className="text-neutral-400">
+          <AlertDialogTitle className="text-foreground">Delete this studio?</AlertDialogTitle>
+          <AlertDialogDescription className="text-muted-foreground">
             &quot;{studioTitle}&quot; will be permanently removed. This can&apos;t be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>

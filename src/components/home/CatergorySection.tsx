@@ -18,46 +18,46 @@ const categories = [
         category: "Photo Studio",
         icon: Camera,
         featured: true,
-        card: "bg-gradient-to-br from-[#0b2a6f] via-[#071a45] to-black text-white",
-        watermark: "text-white/15",
-        badge: "border-white/30 text-white",
-        meta: "text-white/60",
+        card: "bg-gradient-to-br from-primary/80 via-primary/60 to-background text-primary-foreground",
+        watermark: "text-primary-foreground/30",
+        badge: "border-primary-foreground/30 text-primary-foreground",
+        meta: "text-primary-foreground/60",
     },
     {
         name: "Sound Stages",
         category: "Film Stage",
         icon: Clapperboard,
-        card: "bg-[#121212] border border-white/[0.07] text-white",
-        watermark: "text-white/10",
-        badge: "border-white/25 text-white",
-        meta: "text-neutral-400",
+        card: "bg-card border border-border text-card-foreground",
+        watermark: "text-muted-foreground/30",
+        badge: "border-border/30 text-muted-foreground",
+        meta: "text-muted-foreground",
     },
     {
         name: "Podcast Rooms",
         category: "Podcast Lounge",
         icon: Podcast,
-        card: "bg-[#ececec] text-neutral-950",
-        watermark: "text-neutral-400/60",
-        badge: "border-black/25 text-neutral-800",
-        meta: "text-neutral-600",
+        card: "bg-muted text-muted-foreground",
+        watermark: "text-muted-foreground/60",
+        badge: "border-border/30 text-foreground",
+        meta: "text-muted-foreground",
     },
     {
         name: "Music Suites",
         category: "Music Suite",
         icon: Music,
-        card: "bg-gradient-to-br from-[#0d1f4f] via-[#1b45a8] to-[#3b82f6] text-white",
-        watermark: "text-white/20",
-        badge: "border-white/30 text-white",
-        meta: "text-white/70",
+        card: "bg-gradient-to-br from-primary/80 via-primary/60 to-primary/40 text-primary-foreground",
+        watermark: "text-primary-foreground/30",
+        badge: "border-primary-foreground/30 text-primary-foreground",
+        meta: "text-primary-foreground/70",
     },
     {
         name: "Art Workshops",
         category: "Workshop",
         icon: Palette,
-        card: "bg-[#121212] border border-white/[0.07] text-white",
-        watermark: "text-white/10",
-        badge: "border-white/25 text-white",
-        meta: "text-neutral-400",
+        card: "bg-card border border-border text-card-foreground",
+        watermark: "text-muted-foreground/30",
+        badge: "border-border/30 text-muted-foreground",
+        meta: "text-muted-foreground",
     },
 ];
 
@@ -92,21 +92,21 @@ const CatergorySection = async () => {
     const studios = await getStudios();
 
     return (
-        <section className="bg-[#0A0A0A] text-white">
+        <section className="bg-background text-foreground">
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
                 <div className="flex items-end justify-between gap-4">
                     <div>
-                        <h2 className="text-[26px] font-bold tracking-[-0.02em] text-white sm:text-[28px]">
+                        <h2 className="text-[26px] font-bold tracking-[-0.02em] text-foreground sm:text-[28px]">
                             Browse by category
                         </h2>
-                        <p className="mt-2  text-[15px] text-neutral-400">
+                        <p className="mt-2  text-[15px] text-muted-foreground">
                             Jump straight to the kind of space you need.
                         </p>
                     </div>
 
                     <Link
                         href="/studios"
-                        className="inline-flex h-8 shrink-0 items-center rounded-full border border-white/15 px-4 text-[11px] font-medium text-white transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]"
+                        className="inline-flex h-8 shrink-0 items-center rounded-full border border-border px-4 text-[11px] font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                         View all studios
                     </Link>
@@ -122,7 +122,7 @@ const CatergorySection = async () => {
                             <Link
                                 key={item.name}
                                 href={categoryHref(item.category)}
-                                className={`group relative flex flex-col justify-end overflow-hidden rounded-2xl p-4 transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A] ${item.card} ${
+                                className={`group relative flex flex-col justify-end overflow-hidden rounded-2xl p-4 transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${item.card} ${
                                     featured
                                         ? "col-span-2 min-h-[280px] p-6 lg:row-span-2 lg:min-h-0"
                                         : "min-h-[140px]"
@@ -162,7 +162,7 @@ const CatergorySection = async () => {
                                     </p>
 
                                     {featured && (
-                                        <span className="mt-4 inline-flex h-8 items-center rounded-full bg-white px-4 text-[12px] font-medium text-neutral-950">
+                                        <span className="mt-4 inline-flex h-8 items-center rounded-full bg-primary px-4 text-[12px] font-medium text-primary-foreground">
                                             Browse photo studios
                                         </span>
                                     )}

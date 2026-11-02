@@ -39,31 +39,31 @@ const socials = [
 
 const Footer = () => {
     return (
-        <footer className="border-t border-white/10 bg-[#0A0A0A] text-white">
+        <footer className="border-t border-border bg-background text-foreground">
             <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-12 sm:px-6 md:flex-row md:items-start md:justify-between lg:px-8 lg:py-14">
                 <div className="max-w-sm">
                     <Link href="/" className="flex w-fit items-center gap-2">
                         <Image src="/logo.png" alt="StudioSpace" width={28} height={28} />
                         <span className="text-xl font-semibold tracking-[-0.01em] whitespace-nowrap">StudioSpace</span>
                     </Link>
-                    <p className="mt-4 text-[13px] leading-relaxed text-white/35">
+                    <p className="mt-4 text-[13px] leading-relaxed text-muted-foreground/60">
                         Book creative spaces from people who make things. Photo, sound, podcast and art studios in one place.
                     </p>
                 </div>
 
                 <div className="flex flex-col gap-8">
                     <nav aria-label="Studio categories">
-                        <ul className="flex max-w-sm flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-white/60">
+                        <ul className="flex max-w-sm flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted-foreground/60">
                             {categories.map((category, index) => (
                                 <li key={category.name} className="flex items-center gap-2">
                                     <Link
                                         href={category.href}
-                                        className="whitespace-nowrap transition-colors hover:text-white"
+                                        className="whitespace-nowrap transition-colors hover:text-foreground"
                                     >
                                         {category.name}
                                     </Link>
                                     {index < categories.length - 1 && (
-                                        <span aria-hidden="true" className="text-white/20">·</span>
+                                        <span aria-hidden="true" className="text-muted-foreground/30">·</span>
                                     )}
                                 </li>
                             ))}
@@ -71,7 +71,7 @@ const Footer = () => {
                     </nav>
 
                     <div>
-                        <p className="text-[13px] text-white/60">Follow us</p>
+                        <p className="text-[13px] text-muted-foreground/60">Follow us</p>
                         <ul className="mt-3 flex items-center gap-2">
                             {socials.map((social) => (
                                 <li key={social.name}>
@@ -80,7 +80,7 @@ const Footer = () => {
                                         target="_blank"
                                         rel="noreferrer"
                                         aria-label={social.name}
-                                        className="flex size-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/80 transition-colors hover:border-white/25 hover:bg-white/10 hover:text-white"
+                                        className="flex size-8 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground/80 transition-colors hover:border-border hover:bg-accent hover:text-foreground"
                                     >
                                         <svg
                                             viewBox="0 0 24 24"

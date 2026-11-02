@@ -30,25 +30,25 @@ const features = [
 
 const BookAndHost = () => {
     return (
-        <section className="bg-[#0A0A0A] text-white">
+        <section className="bg-background text-foreground">
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
                 <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
                     <div>
-                        <span className="inline-flex items-center rounded-full border border-white/15 px-3 py-1 text-[11px] text-neutral-300">
+                        <span className="inline-flex items-center rounded-full border border-border px-3 py-1 text-[11px] text-muted-foreground">
                             Host Guarantees
                         </span>
 
-                        <h2 className="mt-4 max-w-[22rem] text-[26px] font-bold tracking-[-0.02em] text-white sm:text-[30px]">
+                        <h2 className="mt-4 max-w-[22rem] text-[26px] font-bold tracking-[-0.02em] text-foreground sm:text-[30px]">
                             Book and host with confidence
                         </h2>
-                        <p className="mt-3 max-w-md text-[15px] text-neutral-400">
+                        <p className="mt-3 max-w-md text-[15px] text-muted-foreground">
                             Every space and every person on StudioSpace is backed by protection,
                             verification and real support.
                         </p>
 
                         <Link
                             href="/add-studio"
-                            className="mt-6 inline-flex h-10 items-center justify-center rounded-full bg-white px-5 text-[14px] font-medium text-neutral-950 transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]"
+                            className="mt-6 inline-flex h-10 items-center justify-center rounded-full bg-primary px-5 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                         >
                             Host Your Space
                         </Link>
@@ -58,9 +58,9 @@ const BookAndHost = () => {
                         {features.map(({ title, description, icon: Icon }) => (
                             <div
                                 key={title}
-                                className="rounded-xl border border-white/10 bg-white/5 p-5"
+                                className="rounded-xl border border-border bg-accent p-5"
                             >
-                                <span className="flex size-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04]">
+                                <span className="flex size-9 items-center justify-center rounded-lg border border-border bg-muted">
                                     <Icon
                                         aria-hidden="true"
                                         strokeWidth={1.5}
@@ -68,10 +68,10 @@ const BookAndHost = () => {
                                     />
                                 </span>
 
-                                <h3 className="mt-4 text-[15px] font-semibold text-white">
+                                <h3 className="mt-4 text-[15px] font-semibold text-foreground">
                                     {title}
                                 </h3>
-                                <p className="mt-1.5 text-[13px] leading-relaxed text-neutral-400">
+                                <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
                                     {description}
                                 </p>
                             </div>

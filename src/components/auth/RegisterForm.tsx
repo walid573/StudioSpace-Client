@@ -13,7 +13,7 @@ import { getAuthErrorMessage } from "@/lib/auth-errors";
 import { signUp, signIn } from "@/lib/auth-client";
 
 const inputClass =
-  "h-11 rounded-xl border-white/10 bg-white/[0.04] px-3 text-[14px] text-white placeholder:text-neutral-500 transition-colors focus-visible:border-white/25 focus-visible:ring-white/10";
+  "h-11 rounded-xl border-input bg-background px-3 text-[14px] text-foreground placeholder:text-muted-foreground transition-colors focus-visible:border-ring focus-visible:ring-ring/10";
 
 type FieldErrors = {
   name?: string;
@@ -117,17 +117,17 @@ export default function RegisterForm() {
   }
 
   return (
-    <div className="w-full max-w-[420px] rounded-2xl border border-white/10 bg-[#111111] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.35)] sm:p-7">
-      <h1 className="text-[28px] leading-tight font-bold tracking-[-0.03em] text-white">
+    <div className="w-full max-w-[420px] rounded-2xl border border-border bg-card p-6 shadow-[0_18px_45px_rgba(0,0,0,0.08)] sm:p-7">
+      <h1 className="text-[28px] leading-tight font-bold tracking-[-0.03em] text-foreground">
         Create your account
       </h1>
-      <p className="mt-2 text-[13px] leading-5 text-neutral-400">
+      <p className="mt-2 text-[13px] leading-5 text-muted-foreground">
         Book creative spaces or host your own in minutes.
       </p>
 
       <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="register-name" className="text-[12px] font-medium text-white">
+          <Label htmlFor="register-name" className="text-[12px] font-medium text-foreground">
             Name
           </Label>
           <Input
@@ -150,7 +150,7 @@ export default function RegisterForm() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="register-email" className="text-[12px] font-medium text-white">
+          <Label htmlFor="register-email" className="text-[12px] font-medium text-foreground">
             Email
           </Label>
           <Input
@@ -173,7 +173,7 @@ export default function RegisterForm() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="register-photo" className="text-[12px] font-medium text-white">
+          <Label htmlFor="register-photo" className="text-[12px] font-medium text-foreground">
             Photo URL
           </Label>
           <Input
@@ -193,14 +193,14 @@ export default function RegisterForm() {
           {fieldErrors.photoUrl ? (
             <p className="text-[11px] text-red-400">{fieldErrors.photoUrl}</p>
           ) : (
-            <p className="text-[11px] leading-4 text-neutral-500">
+            <p className="text-[11px] leading-4 text-muted-foreground">
               A link to your profile picture
             </p>
           )}
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="register-password" className="text-[12px] font-medium text-white">
+          <Label htmlFor="register-password" className="text-[12px] font-medium text-foreground">
             Password
           </Label>
           <div className="relative">
@@ -220,7 +220,7 @@ export default function RegisterForm() {
               type="button"
               onClick={() => setShowPassword((visible) => !visible)}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              className="absolute top-1/2 right-3 -translate-y-1/2 text-neutral-500 transition-colors hover:text-white focus-visible:text-white focus-visible:outline-none"
+              className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
             >
               {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
@@ -261,7 +261,7 @@ export default function RegisterForm() {
         <Button
           type="submit"
           disabled={pending}
-          className="h-11 w-full gap-2 rounded-full bg-white text-[13px] font-semibold text-neutral-950 hover:bg-neutral-200 disabled:opacity-60"
+          className="h-11 w-full gap-2 rounded-full bg-primary text-[13px] font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
         >
           {submitting && <Loader2 className="size-4 animate-spin" />}
           {submitting ? "Creating account…" : "Register"}
@@ -269,9 +269,9 @@ export default function RegisterForm() {
       </form>
 
       <div className="my-5 flex items-center gap-3">
-        <span className="h-px flex-1 bg-white/10" />
-        <span className="text-[11px] text-neutral-500">or</span>
-        <span className="h-px flex-1 bg-white/10" />
+        <span className="h-px flex-1 bg-border" />
+        <span className="text-[11px] text-muted-foreground">or</span>
+        <span className="h-px flex-1 bg-border" />
       </div>
 
       <Button
@@ -279,7 +279,7 @@ export default function RegisterForm() {
         variant="outline"
         disabled={pending}
         onClick={handleGoogleSignUp}
-        className="h-11 w-full gap-2 rounded-full border-white/15 bg-transparent text-[13px] font-medium text-white hover:bg-white/[0.06] hover:text-white disabled:opacity-60"
+        className="h-11 w-full gap-2 rounded-full border-border bg-transparent text-[13px] font-medium text-foreground hover:bg-accent hover:text-foreground disabled:opacity-60"
       >
         {googleLoading ? (
           <Loader2 className="size-4 animate-spin" />
@@ -289,11 +289,11 @@ export default function RegisterForm() {
         Continue with Google
       </Button>
 
-      <p className="mt-6 text-center text-[13px] text-neutral-400">
+      <p className="mt-6 text-center text-[13px] text-muted-foreground">
         Already have an account?{" "}
         <Link
           href="/login"
-          className="font-semibold text-white underline-offset-4 transition-colors hover:underline"
+          className="font-semibold text-foreground underline-offset-4 transition-colors hover:underline"
         >
           Login
         </Link>

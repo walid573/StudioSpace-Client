@@ -43,10 +43,10 @@ type FormState = {
 };
 
 const DEFAULT_TRIGGER =
-  "inline-flex h-8 items-center gap-1.5 rounded-full border border-white/10 px-3 text-[12px] text-neutral-200 transition-colors hover:bg-white/[0.06]";
+  "inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-background px-3 text-[12px] text-foreground transition-colors hover:bg-accent";
 
 const inputClass =
-  "h-10 w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 text-[13px] text-white outline-none transition-colors placeholder:text-neutral-500 focus:border-white/30 [color-scheme:dark]";
+  "h-10 w-full rounded-lg border border-input bg-background px-3 text-[13px] text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring";
 
 function toForm(booking: Booking): FormState {
   return {
@@ -64,7 +64,7 @@ function toMinutes(time: string) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="text-[11px] font-medium text-neutral-400">{label}</span>
+      <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
       <div className="mt-1.5">{children}</div>
     </label>
   );
@@ -162,10 +162,10 @@ export default function EditBooking({
         {label}
       </DialogTrigger>
 
-      <DialogContent className="dark border border-white/10 bg-[#111111] text-white sm:max-w-md">
+      <DialogContent className="border border-border bg-popover text-foreground sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-[16px] font-semibold text-white">Edit booking</DialogTitle>
-          <DialogDescription className="text-[12px] text-neutral-400">
+          <DialogTitle className="text-[16px] font-semibold text-foreground">Edit booking</DialogTitle>
+          <DialogDescription className="text-[12px] text-muted-foreground">
             {studioTitle
               ? `Change the date or time for ${studioTitle}.`
               : "Change the date or time of your booking."}{" "}
@@ -203,7 +203,7 @@ export default function EditBooking({
             </Field>
           </div>
 
-          <p className={`text-[12px] ${validRange ? "text-neutral-400" : "text-red-300"}`}>
+          <p className={`text-[12px] ${validRange ? "text-muted-foreground" : "text-red-400"}`}>
             {validRange ? `${hours} hrs` : "End time must be after start time."}
           </p>
 

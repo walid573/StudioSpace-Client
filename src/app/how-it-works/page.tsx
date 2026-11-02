@@ -25,10 +25,10 @@ const HOST_STEPS = [
 ];
 
 const PRIMARY_BUTTON =
-  "inline-flex h-9 items-center rounded-full bg-white px-4 text-[12px] font-medium text-neutral-950 transition-colors hover:bg-neutral-200 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A] focus-visible:outline-none";
+  "inline-flex h-9 items-center rounded-full bg-primary px-4 text-[12px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 const SECONDARY_BUTTON =
-  "inline-flex h-9 items-center rounded-full border border-white/15 px-4 text-[12px] font-medium text-neutral-200 transition-colors hover:border-white/30 hover:bg-white/[0.06] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A] focus-visible:outline-none";
+  "inline-flex h-9 items-center rounded-full border border-border bg-background px-4 text-[12px] font-medium text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 const STEPS = [
   {
@@ -80,18 +80,18 @@ function StepText({ index }: { index: number }) {
   return (
     <div>
       <StepLabel index={index} />
-      <h2 className="mt-2 text-[19px] font-bold tracking-[-0.01em] text-white sm:text-2xl">
+      <h2 className="mt-2 text-[19px] font-bold tracking-[-0.01em] text-foreground sm:text-2xl">
         {step.title}
       </h2>
       <ul className="mt-3 space-y-2">
         {step.points.map((point) => (
           <li
             key={point}
-            className="flex gap-2 text-[12.5px] leading-relaxed text-neutral-400"
+            className="flex gap-2 text-[12.5px] leading-relaxed text-muted-foreground"
           >
             <span
               aria-hidden="true"
-              className="mt-[7px] size-1 shrink-0 rounded-full bg-neutral-600"
+              className="mt-[7px] size-1 shrink-0 rounded-full bg-muted-foreground"
             />
             <span>{point}</span>
           </li>
@@ -128,20 +128,20 @@ function ExplorePanel() {
   ];
 
   return (
-    <div className="rounded-xl border border-white/10 bg-[#0D0D0D] p-3">
-      <h3 className="text-[12px] font-bold tracking-[-0.02em] text-white">Explore Studios</h3>
-      <p className="mt-0.5 text-[9.5px] text-neutral-400">
+    <div className="rounded-xl border border-border bg-card p-3">
+      <h3 className="text-[12px] font-bold tracking-[-0.02em] text-foreground">Explore Studios</h3>
+      <p className="mt-0.5 text-[9.5px] text-muted-foreground">
         Filter by category, price and location.
       </p>
 
-      <div className="mt-2 rounded-lg border border-white/10 p-2">
+      <div className="mt-2 rounded-lg border border-border bg-muted/30 p-2">
         <div className="relative">
           <Search
             aria-hidden="true"
             strokeWidth={1.5}
-            className="pointer-events-none absolute top-1/2 left-2 size-3 -translate-y-1/2 text-neutral-500"
+            className="pointer-events-none absolute top-1/2 left-2 size-3 -translate-y-1/2 text-muted-foreground"
           />
-          <div className="flex h-7 items-center rounded-md bg-white/[0.04] pr-2 pl-7 text-[9.5px] text-neutral-500">
+          <div className="flex h-7 items-center rounded-md bg-muted pr-2 pl-7 text-[9.5px] text-muted-foreground">
             Search studios or location
           </div>
         </div>
@@ -152,8 +152,8 @@ function ExplorePanel() {
               key={item}
               className={
                 index === 0
-                  ? "inline-flex h-5 items-center rounded-full bg-white px-2 text-[8.5px] font-medium text-neutral-950"
-                  : "inline-flex h-5 items-center rounded-full px-1.5 text-[8.5px] text-neutral-400"
+                  ? "inline-flex h-5 items-center rounded-full bg-foreground px-2 text-[8.5px] font-medium text-background"
+                  : "inline-flex h-5 items-center rounded-full px-1.5 text-[8.5px] text-muted-foreground"
               }
             >
               {item}
@@ -166,28 +166,28 @@ function ExplorePanel() {
         {studios.map((studio, index) => (
           <div
             key={studio.title}
-            className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.03]"
+            className="overflow-hidden rounded-lg border border-border bg-muted/40"
           >
             <div className={`h-14 bg-gradient-to-br sm:h-16 ${STUDIO_GRADIENTS[index]}`} />
 
             <div className="p-2">
-              <span className="inline-flex rounded-full bg-white/10 px-1.5 py-0.5 text-[7.5px] font-medium text-neutral-200">
+              <span className="inline-flex rounded-full bg-muted px-1.5 py-0.5 text-[7.5px] font-medium text-foreground">
                 {studio.category}
               </span>
-              <p className="mt-1 truncate text-[10px] font-semibold tracking-[-0.01em] text-white">
+              <p className="mt-1 truncate text-[10px] font-semibold tracking-[-0.01em] text-foreground">
                 {studio.title}
               </p>
-              <p className="truncate text-[8.5px] text-neutral-400">{studio.place}</p>
+              <p className="truncate text-[8.5px] text-muted-foreground">{studio.place}</p>
 
               <div className="mt-1 flex items-center justify-between gap-1.5">
-                <p className="text-[10px] font-semibold text-white">
+                <p className="text-[10px] font-semibold text-foreground">
                   {studio.price}
-                  <span className="ml-0.5 text-[7.5px] font-normal text-neutral-400">/hr</span>
+                  <span className="ml-0.5 text-[7.5px] font-normal text-muted-foreground">/hr</span>
                 </p>
-                <p className="text-[7.5px] text-neutral-400">{studio.meta}</p>
+                <p className="text-[7.5px] text-muted-foreground">{studio.meta}</p>
               </div>
 
-              <div className="mt-1.5 flex h-5 items-center justify-center rounded-full bg-white text-[8px] font-medium text-neutral-950">
+              <div className="mt-1.5 flex h-5 items-center justify-center rounded-full bg-foreground text-[8px] font-medium text-background">
                 View Details
               </div>
             </div>
@@ -209,16 +209,16 @@ function BookingField({
 }) {
   return (
     <div>
-      <p className="text-[9px] text-neutral-400">{label}</p>
+      <p className="text-[9px] text-muted-foreground">{label}</p>
       <div
-        className={`mt-1 flex h-8 items-center justify-between gap-2 rounded-lg border px-2 text-[10.5px] text-white ${
-          open ? "border-white/25 bg-white/[0.06]" : "border-white/10 bg-white/[0.03]"
+        className={`mt-1 flex h-8 items-center justify-between gap-2 rounded-lg border px-2 text-[10.5px] text-foreground ${
+          open ? "border-border bg-accent" : "border-border bg-muted/30"
         }`}
       >
         <span className="truncate">{value}</span>
         <ChevronDown
           aria-hidden="true"
-          className={`size-3 shrink-0 text-neutral-500 ${open ? "rotate-180" : ""}`}
+          className={`size-3 shrink-0 text-muted-foreground ${open ? "rotate-180" : ""}`}
         />
       </div>
     </div>
@@ -228,13 +228,13 @@ function BookingField({
 function PriceRow() {
   return (
     <div className="flex items-center justify-between gap-3">
-      <p className="text-[22px] leading-none font-bold tracking-[-0.04em] text-white">
+      <p className="text-[22px] leading-none font-bold tracking-[-0.04em] text-foreground">
         $45
-        <span className="ml-1 text-[10px] font-medium tracking-normal text-neutral-400">
+        <span className="ml-1 text-[10px] font-medium tracking-normal text-muted-foreground">
           / hr
         </span>
       </p>
-      <span className="shrink-0 rounded-full border border-white/10 px-2 py-0.5 text-[9px] text-neutral-300">
+      <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[9px] text-muted-foreground">
         Deposit $100
       </span>
     </div>
@@ -243,10 +243,10 @@ function PriceRow() {
 
 function BookingCard({ children }: { children: ReactNode }) {
   return (
-    <div className="relative mx-auto w-full max-w-lg overflow-hidden rounded-[20px] border border-white/10 bg-[#111111] p-3.5 shadow-[0_26px_60px_-16px_rgba(0,0,0,0.9)] sm:p-4">
+    <div className="relative mx-auto w-full max-w-lg overflow-hidden rounded-[20px] border border-border bg-card p-3.5 shadow-[0_26px_60px_-16px_rgba(0,0,0,0.12)] sm:p-4">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/[0.05] to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-primary/5 to-transparent"
       />
       <div
         aria-hidden="true"
@@ -268,25 +268,25 @@ function HoursPanel() {
       </div>
 
       {/* The same Start / End popover the real booking form opens. */}
-      <div className="mt-2 rounded-lg border border-white/10 bg-[#161616] p-2.5 shadow-2xl">
+      <div className="mt-2 rounded-lg border border-border bg-muted/40 p-2.5 shadow-sm">
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <p className="text-[8.5px] text-neutral-400">Start</p>
-            <div className="mt-1 flex h-7 items-center rounded-md border border-white/10 bg-white/[0.03] px-2 text-[9.5px] text-white">
+            <p className="text-[8.5px] text-muted-foreground">Start</p>
+            <div className="mt-1 flex h-7 items-center rounded-md border border-border bg-background px-2 text-[9.5px] text-foreground">
               10:00
             </div>
           </div>
           <div>
-            <p className="text-[8.5px] text-neutral-400">End</p>
-            <div className="mt-1 flex h-7 items-center rounded-md border border-white/10 bg-white/[0.03] px-2 text-[9.5px] text-white">
+            <p className="text-[8.5px] text-muted-foreground">End</p>
+            <div className="mt-1 flex h-7 items-center rounded-md border border-border bg-background px-2 text-[9.5px] text-foreground">
               14:00
             </div>
           </div>
         </div>
 
         <div className="mt-2 flex items-center justify-between gap-2">
-          <span className="text-[8.5px] text-neutral-500">4 hrs selected</span>
-          <span className="inline-flex h-5 items-center rounded-full bg-white px-2 text-[8.5px] font-medium text-neutral-950">
+          <span className="text-[8.5px] text-muted-foreground">4 hrs selected</span>
+          <span className="inline-flex h-5 items-center rounded-full bg-foreground px-2 text-[8.5px] font-medium text-background">
             Done
           </span>
         </div>
@@ -305,16 +305,16 @@ function BookingPanel() {
         <BookingField label="Hours" value="10:00 to 14:00" />
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.02] px-2.5 py-2">
-        <span className="text-[10px] text-neutral-400">4 hrs × $45</span>
-        <span className="text-[12px] font-semibold text-white">$180</span>
+      <div className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/40 px-2.5 py-2">
+        <span className="text-[10px] text-muted-foreground">4 hrs × $45</span>
+        <span className="text-[12px] font-semibold text-foreground">$180</span>
       </div>
 
-      <div className="mt-3 flex h-8 items-center justify-center rounded-full bg-white text-[10.5px] font-semibold text-neutral-950 shadow-[0_6px_20px_rgba(255,255,255,0.12)]">
+      <div className="mt-3 flex h-8 items-center justify-center rounded-full bg-primary text-[10.5px] font-semibold text-primary-foreground shadow-[0_6px_20px_rgba(37,99,235,0.2)]">
         Book Workspace Now
       </div>
 
-      <p className="mt-1.5 text-center text-[8.5px] text-neutral-500">
+      <p className="mt-1.5 text-center text-[8.5px] text-muted-foreground">
         Status starts as Pending until the host confirms.
       </p>
     </BookingCard>
@@ -330,12 +330,12 @@ function ChecklistPanel() {
   ];
 
   return (
-    <div className="rounded-xl border border-blue-500/20 bg-blue-500/[0.04] p-4">
+    <div className="rounded-xl border border-blue-500/20 bg-blue-500/[0.08] p-4">
       <ol className="space-y-3">
         {items.map((item) => (
-          <li key={item} className="flex items-center gap-2.5 text-[11.5px] text-neutral-200">
+          <li key={item} className="flex items-center gap-2.5 text-[11.5px] text-foreground">
             <span className="flex size-4 shrink-0 items-center justify-center rounded-full border border-blue-400/40 bg-blue-500/10">
-              <Check aria-hidden="true" className="size-2.5 text-blue-300" />
+              <Check aria-hidden="true" className="size-2.5 text-blue-600" />
             </span>
             {item}
           </li>
@@ -349,19 +349,19 @@ const PANELS = [ExplorePanel, HoursPanel, BookingPanel, ChecklistPanel];
 
 export default function HowItWorksPage() {
   return (
-    <div className="bg-[#0A0A0A] text-white">
+    <div className="bg-background text-foreground">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="pt-8 lg:pt-10">
-          <p className="text-[10px] font-medium tracking-[0.2em] text-neutral-500 uppercase">
+          <p className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase">
             How it works
           </p>
         </div>
 
         <header className="mx-auto max-w-3xl pt-6 pb-10 text-center lg:pt-7 lg:pb-12">
-          <h1 className="text-[28px] leading-[1.1] font-bold tracking-[-0.03em] text-white sm:text-[34px] lg:text-[40px]">
+          <h1 className="text-[28px] leading-[1.1] font-bold tracking-[-0.03em] text-foreground sm:text-[34px] lg:text-[40px]">
             Book a creative space in four simple steps
           </h1>
-          <p className="mx-auto mt-3 max-w-lg text-[13px] leading-relaxed text-neutral-400 sm:text-[14px]">
+          <p className="mx-auto mt-3 max-w-lg text-[13px] leading-relaxed text-muted-foreground sm:text-[14px]">
             From the first search to the final take, StudioSpace keeps booking clear, fast and
             fair for creators and hosts.
           </p>
@@ -384,7 +384,7 @@ export default function HowItWorksPage() {
             return (
               <section
                 key={step.title}
-                className="grid items-center gap-6 border-t border-white/[0.06] py-11 lg:grid-cols-2 lg:gap-14 lg:py-14"
+                className="grid items-center gap-6 border-t border-border py-11 lg:grid-cols-2 lg:gap-14 lg:py-14"
               >
                 <div className={visualFirst ? "lg:order-2" : ""}>
                   <StepText index={index} />
@@ -398,12 +398,12 @@ export default function HowItWorksPage() {
           })}
         </div>
 
-        <section className="border-t border-white/[0.06] py-14 lg:py-20">
-          <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-neutral-300">
+        <section className="border-t border-border py-14 lg:py-20">
+          <span className="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-1 text-[10px] font-medium text-muted-foreground">
             For hosts
           </span>
 
-          <h2 className="mt-4 max-w-xl text-[24px] leading-[1.15] font-bold tracking-[-0.02em] text-white sm:text-[28px]">
+          <h2 className="mt-4 max-w-xl text-[24px] leading-[1.15] font-bold tracking-[-0.02em] text-foreground sm:text-[28px]">
             Hosting works the same way, in reverse
           </h2>
 
@@ -411,26 +411,26 @@ export default function HowItWorksPage() {
             {HOST_STEPS.map((step, index) => (
               <div
                 key={step.title}
-                className={index === 0 ? "sm:pr-6" : "sm:border-l sm:border-white/10 sm:px-6"}
+                className={index === 0 ? "sm:pr-6" : "sm:border-l sm:border-border sm:px-6"}
               >
                 <p className="text-[10px] font-semibold text-blue-500">
                   {String(index + 1).padStart(2, "0")}
                 </p>
-                <h3 className="mt-1.5 text-[14px] font-semibold tracking-[-0.01em] text-white">
+                <h3 className="mt-1.5 text-[14px] font-semibold tracking-[-0.01em] text-foreground">
                   {step.title}
                 </h3>
-                <p className="mt-1.5 text-[12px] leading-relaxed text-neutral-400">{step.body}</p>
+                <p className="mt-1.5 text-[12px] leading-relaxed text-muted-foreground">{step.body}</p>
               </div>
             ))}
           </div>
         </section>
 
         <section className="pt-2 pb-16 lg:pb-20">
-          <div className="relative mx-auto max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-[#0B0B0B] bg-[radial-gradient(120%_140%_at_25%_0%,rgba(37,99,235,0.28),transparent_55%)] px-6 py-10 text-center sm:py-12">
-            <h2 className="text-[22px] font-bold tracking-[-0.02em] text-white sm:text-[26px]">
+          <div className="relative mx-auto max-w-5xl overflow-hidden rounded-2xl border border-border bg-card bg-[radial-gradient(120%_140%_at_25%_0%,rgba(37,99,235,0.28),transparent_55%)] px-6 py-10 text-center sm:py-12">
+            <h2 className="text-[22px] font-bold tracking-[-0.02em] text-foreground sm:text-[26px]">
               Ready to book your first space?
             </h2>
-            <p className="mx-auto mt-2 max-w-sm text-[12.5px] leading-relaxed text-neutral-400">
+            <p className="mx-auto mt-2 max-w-sm text-[12.5px] leading-relaxed text-muted-foreground">
               Browse studios near you and reserve your hours today.
             </p>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">

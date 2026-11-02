@@ -9,6 +9,8 @@ import { auth } from "@/lib/auth";
 const API_URL = process.env.API_URL ?? "http://localhost:8000";
 
 
+export const instant = false;
+
 type Studio = {
   _id: string;
   title?: string;
@@ -56,10 +58,10 @@ const STATUS_STYLES = {
 
 function StatCard({ title, value, href }: { title: string; value: number; href: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#121212] p-5">
-      <p className="text-xs uppercase text-neutral-400">{title}</p>
+    <div className="rounded-2xl border border-border bg-card p-5">
+      <p className="text-xs uppercase text-muted-foreground">{title}</p>
       <p className="mt-1 text-3xl font-bold">{value}</p>
-      <Link href={href} className="mt-3 inline-block text-xs text-neutral-400 hover:text-white">
+      <Link href={href} className="mt-3 inline-block text-xs text-muted-foreground hover:text-foreground">
         View →
       </Link>
     </div>
@@ -94,18 +96,18 @@ export default async function DashboardPage() {
 
   
   return (
-    <div className="mx-auto max-w-5xl min-h-[65vh] px-4 py-10 text-white">
+    <div className="mx-auto max-w-5xl min-h-[65vh] px-4 py-10 text-foreground">
       
       <header className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="mt-1 text-sm text-neutral-400">
+          <p className="mt-1 text-sm text-muted-foreground">
             Welcome back, {session.user.name ?? "there"}.
           </p>
         </div>
         <Link
           href="/add-studio"
-          className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black hover:bg-neutral-200"
+          className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           Add New Studio
         </Link>
@@ -133,10 +135,10 @@ export default async function DashboardPage() {
               return (
                 <li
                   key={booking._id}
-                  className="flex items-center gap-3 rounded-2xl border border-white/10 bg-[#121212] p-3"
+                  className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3"
                 >
                   
-                  <div className="size-14 shrink-0 overflow-hidden rounded-xl bg-neutral-800">
+                  <div className="size-14 shrink-0 overflow-hidden rounded-xl bg-muted">
                     {studio?.imageUrl && (
                       <img
                         src={studio.imageUrl}
@@ -149,7 +151,7 @@ export default async function DashboardPage() {
                  
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold">{studio?.title ?? "Studio booking"}</p>
-                    <p className="truncate text-xs text-neutral-400">
+                    <p className="truncate text-xs text-muted-foreground">
                       {booking.date} · {booking.start} to {booking.end} · {booking.hours} hrs · $
                       {booking.total}
                     </p>
@@ -168,16 +170,16 @@ export default async function DashboardPage() {
 
       
       {myListings.length === 0 && bookings.length === 0 && (
-        <div className="mt-6 rounded-2xl border border-white/10 bg-[#121212] px-6 py-16 text-center">
+        <div className="mt-6 rounded-2xl border border-border bg-card px-6 py-16 text-center">
           <p className="font-semibold">Your dashboard is empty</p>
-          <p className="mt-1 text-sm text-neutral-400">
+          <p className="mt-1 text-sm text-muted-foreground">
             Add your first studio or browse available spaces.
           </p>
           <div className="mt-5 flex justify-center gap-3">
-            <Link href="/add-studio" className="rounded-full bg-white px-4 py-2 text-sm text-black">
+            <Link href="/add-studio" className="rounded-full bg-primary px-4 py-2 text-sm text-primary-foreground">
               Add Studio
             </Link>
-            <Link href="/studios" className="rounded-full border border-white/10 px-4 py-2 text-sm">
+            <Link href="/studios" className="rounded-full border border-border px-4 py-2 text-sm">
               Explore Studios
             </Link>
           </div>

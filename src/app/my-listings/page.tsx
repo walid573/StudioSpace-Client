@@ -50,7 +50,7 @@ async function getMyListings(email: string): Promise<Listing[]> {
 }
 
 const GHOST_BUTTON =
-  "inline-flex h-8 items-center gap-1.5 rounded-full border border-white/10 px-3 text-[12px] text-neutral-200 transition-colors hover:bg-white/[0.06]";
+  "inline-flex h-8 items-center gap-1.5 rounded-full border border-border px-3 text-[12px] text-foreground transition-colors hover:bg-accent";
 const DANGER_BUTTON =
   "inline-flex h-8 items-center gap-1.5 rounded-full border border-red-500/30 px-3 text-[12px] text-red-300 transition-colors hover:bg-red-500/10";
 
@@ -67,7 +67,7 @@ function statusStyles(status?: string) {
   if (status === "pending") {
     return "border-yellow-500/40 bg-yellow-500/10 text-yellow-300";
   }
-  return "border-white/15 bg-white/[0.06] text-neutral-300";
+  return "border-border/40 bg-accent text-muted-foreground";
 }
 
 export default async function MyListingsPage() {
@@ -81,19 +81,19 @@ export default async function MyListingsPage() {
   const count = listings.length;
 
   return (
-    <div className="mx-auto min-h-[65vh] max-w-5xl px-4 py-10 text-white sm:px-6">
+    <div className="mx-auto min-h-[65vh] max-w-5xl px-4 py-10 text-foreground sm:px-6">
       <header className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-[26px] font-bold tracking-[-0.02em] sm:text-[28px]">
             My studio listings
           </h1>
-          <p className="mt-1.5 text-[13px] text-neutral-400">
+          <p className="mt-1.5 text-[13px] text-muted-foreground">
             Manage the spaces you host. {count} {count === 1 ? "listing" : "listings"}.
           </p>
         </div>
         <Link
           href="/add-studio"
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-white px-4 text-[12px] font-medium text-neutral-950 transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-primary px-4 text-[12px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <CirclePlus className="size-3.5" aria-hidden="true" />
           Add New Studio
@@ -101,44 +101,44 @@ export default async function MyListingsPage() {
       </header>
 
       {count === 0 ? (
-        <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-white/[0.07] bg-[#121212] px-6 py-16 text-center">
-          <p className="text-[15px] font-semibold text-white">No listings yet</p>
-          <p className="mt-1.5 max-w-xs text-[13px] text-neutral-400">
+        <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-border bg-card px-6 py-16 text-center">
+          <p className="text-[15px] font-semibold text-foreground">No listings yet</p>
+          <p className="mt-1.5 max-w-xs text-[13px] text-muted-foreground">
             Publish your first space and it will show up here.
           </p>
           <Link
             href="/add-studio"
-            className="mt-5 inline-flex h-9 items-center rounded-full bg-white px-4 text-[12px] font-medium text-neutral-950 transition-colors hover:bg-neutral-200"
+            className="mt-5 inline-flex h-9 items-center rounded-full bg-primary px-4 text-[12px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Add New Studio
           </Link>
         </div>
       ) : (
-        <div className="mt-6 overflow-hidden rounded-2xl border border-white/[0.07] bg-[#121212]">
+        <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left">
               <caption className="sr-only">Your studio listings</caption>
               <thead>
-                <tr className="border-b border-white/[0.06]">
-                  <th className="px-5 py-3 text-[11px] font-normal text-neutral-500">Studio</th>
-                  <th className="w-[150px] px-5 py-3 text-[11px] font-normal text-neutral-500">
+                <tr className="border-b border-border">
+                  <th className="px-5 py-3 text-[11px] font-normal text-muted-foreground">Studio</th>
+                  <th className="w-[150px] px-5 py-3 text-[11px] font-normal text-muted-foreground">
                     Location
                   </th>
-                  <th className="w-[110px] px-5 py-3 text-[11px] font-normal text-neutral-500">
+                  <th className="w-[110px] px-5 py-3 text-[11px] font-normal text-muted-foreground">
                     Rate
                   </th>
-                  <th className="w-[90px] px-5 py-3 text-[11px] font-normal text-neutral-500">
+                  <th className="w-[90px] px-5 py-3 text-[11px] font-normal text-muted-foreground">
                     Rating
                   </th>
-                  <th className="w-[110px] px-5 py-3 text-[11px] font-normal text-neutral-500">
+                  <th className="w-[110px] px-5 py-3 text-[11px] font-normal text-muted-foreground">
                     Status
                   </th>
-                  <th className="w-[190px] px-5 py-3 text-right text-[11px] font-normal text-neutral-500">
+                  <th className="w-[190px] px-5 py-3 text-right text-[11px] font-normal text-muted-foreground">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.06]">
+              <tbody className="divide-y divide-border">
                 {listings.map((listing) => {
                   const place =
                     [listing.location?.area, listing.location?.city].filter(Boolean).join(", ") ||
@@ -147,10 +147,10 @@ export default async function MyListingsPage() {
                   const thumbnail = listing.imageUrl?.trim() || undefined;
 
                   return (
-                    <tr key={listing._id} className="transition-colors hover:bg-white/[0.02]">
+                    <tr key={listing._id} className="transition-colors hover:bg-accent/50">
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="size-10 shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-blue-600/60 via-blue-900/40 to-neutral-900">
+                          <div className="size-10 shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-primary/60 via-primary/40 to-muted">
                             {thumbnail && (
                               <img
                                 src={thumbnail}
@@ -161,28 +161,28 @@ export default async function MyListingsPage() {
                             )}
                           </div>
                           <div className="min-w-0">
-                            <p className="truncate text-[13.5px] font-semibold text-white">
+                            <p className="truncate text-[13.5px] font-semibold text-foreground">
                               {listing.title}
                             </p>
-                            <p className="mt-0.5 truncate text-[11px] text-neutral-400">
+                            <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
                               {listing.category}
                             </p>
                           </div>
                         </div>
                       </td>
 
-                      <td className="px-5 py-3 text-[13px] text-neutral-200">{place}</td>
+                      <td className="px-5 py-3 text-[13px] text-muted-foreground">{place}</td>
 
-                      <td className="px-5 py-3 text-[13px] font-medium text-white">
+                      <td className="px-5 py-3 text-[13px] font-medium text-foreground">
                         ${listing.hourlyRate}
-                        <span className="ml-1 text-[11px] font-normal text-neutral-400">/hr</span>
+                        <span className="ml-1 text-[11px] font-normal text-muted-foreground">/hr</span>
                       </td>
 
-                      <td className="px-5 py-3 text-[13px] text-neutral-200">
+                      <td className="px-5 py-3 text-[13px] text-muted-foreground">
                         {listing.rating ? (
                           listing.rating
                         ) : (
-                          <span className="text-neutral-500">New</span>
+                          <span className="text-muted-foreground">New</span>
                         )}
                       </td>
 

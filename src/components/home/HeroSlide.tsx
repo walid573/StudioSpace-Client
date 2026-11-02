@@ -4,21 +4,21 @@ import type { Slide } from "./slides";
 
 export default function HeroSlide({ slide, priority = false }: { slide: Slide; priority?: boolean }) {
   return (
-    <section className="bg-[#0A0A0A] text-white">
+    <section className="bg-background text-foreground">
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.15fr_1fr] lg:gap-6 lg:px-8 lg:py-20">
         <div className="max-w-[34rem]">
-          <span className="inline-flex rounded-full border border-white/15 px-3 py-1.5 text-[13px] font-medium text-neutral-200">
+          <span className="inline-flex rounded-full border border-primary/30 px-3 py-1.5 text-[13px] font-medium text-muted-foreground">
             {slide.tag}
           </span>
           <h1 className="mt-6 text-[clamp(2.5rem,5.2vw,3.5rem)] font-semibold leading-[1.05] tracking-[-0.035em]">
             {slide.title}
           </h1>
-          <p className="mt-6 max-w-[46ch] text-[17px] leading-relaxed text-neutral-400">{slide.text}</p>
+          <p className="mt-6 max-w-[46ch] text-[17px] leading-relaxed text-muted-foreground">{slide.text}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link href="/studios" className="inline-flex h-12 items-center justify-center rounded-full bg-white px-7 text-[15px] font-medium text-neutral-950 hover:bg-neutral-200">
+            <Link href="/studios" className="inline-flex h-12 items-center justify-center rounded-full bg-primary px-7 text-[15px] font-medium text-primary-foreground hover:bg-primary/90">
               Explore Studios
             </Link>
-            <Link href="/add-studio" className="inline-flex h-12 items-center justify-center rounded-full border border-white/20 px-7 text-[15px] font-medium hover:bg-white/5">
+            <Link href="/add-studio" className="inline-flex h-12 items-center justify-center rounded-full border border-border px-7 text-[15px] font-medium hover:bg-accent">
               Host Your Space
             </Link>
           </div>

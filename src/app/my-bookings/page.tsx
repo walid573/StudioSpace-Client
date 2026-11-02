@@ -17,7 +17,7 @@ type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
 const STATUS_META: Record<BookingStatus, { label: string; className: string }> = {
   pending: { label: "Pending", className: "border-yellow-500/40 bg-yellow-500/10 text-yellow-300" },
   confirmed: { label: "Confirmed", className: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" },
-  completed: { label: "Completed", className: "border-white/15 bg-white/[0.06] text-neutral-300" },
+  completed: { label: "Completed", className: "border-border/40 bg-accent text-muted-foreground" },
   cancelled: { label: "Cancelled", className: "border-red-500/40 bg-red-500/10 text-red-300" },
 };
 
@@ -30,7 +30,7 @@ const FILTERS = [
 ] as const;
 
 const PRIMARY_BUTTON =
-  "inline-flex h-8 items-center rounded-full bg-white px-3.5 text-[12px] font-medium text-neutral-950 transition-colors hover:bg-neutral-200";
+  "inline-flex h-8 items-center rounded-full bg-primary px-3.5 text-[12px] font-medium text-primary-foreground transition-colors hover:bg-primary/90";
 
 const THUMBNAIL_GRADIENTS = [
   "from-blue-500/70 via-blue-800/40 to-neutral-900",
@@ -124,17 +124,17 @@ export default function MyBookingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl min-h-[65vh] px-4 py-10 text-white sm:px-6">
+    <div className="mx-auto max-w-5xl min-h-[65vh] px-4 py-10 text-foreground sm:px-6">
       <header className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-[26px] font-bold tracking-[-0.02em]">My bookings</h1>
-          <p className="mt-1.5 text-[13px] text-neutral-400">
+          <p className="mt-1.5 text-[13px] text-muted-foreground">
             Review, edit or cancel your studio reservations.
           </p>
         </div>
         <Link
           href="/studios"
-          className="inline-flex h-9 shrink-0 items-center rounded-full bg-white px-4 text-[12px] font-medium text-neutral-950 transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]"
+          className="inline-flex h-9 shrink-0 items-center rounded-full bg-primary px-4 text-[12px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           Explore Studios
         </Link>
@@ -150,8 +150,8 @@ export default function MyBookingsPage() {
               aria-pressed={active}
               className={
                 active
-                  ? "inline-flex h-7 items-center rounded-full bg-white px-3 text-[11px] font-medium text-neutral-950"
-                  : "inline-flex h-7 items-center rounded-full border border-white/10 px-3 text-[11px] text-neutral-400"
+                  ? "inline-flex h-7 items-center rounded-full bg-primary px-3 text-[11px] font-medium text-primary-foreground"
+                  : "inline-flex h-7 items-center rounded-full border border-border px-3 text-[11px] text-muted-foreground"
               }
             >
               {filter.label}
@@ -164,9 +164,9 @@ export default function MyBookingsPage() {
       </div>
 
       {bookings.length === 0 ? (
-        <div className="mt-4 flex flex-col items-center justify-center rounded-2xl border border-white/[0.07] bg-[#121212] px-6 py-14 text-center">
-          <p className="text-[15px] font-semibold text-white">No bookings yet</p>
-          <p className="mt-1.5 max-w-xs text-[13px] text-neutral-400">
+        <div className="mt-4 flex flex-col items-center justify-center rounded-2xl border border-border bg-card px-6 py-14 text-center">
+          <p className="text-[15px] font-semibold text-foreground">No bookings yet</p>
+          <p className="mt-1.5 max-w-xs text-[13px] text-muted-foreground">
             Browse the studios and reserve your first session.
           </p>
           <Link href="/studios" className={`mt-5 h-9 px-4 ${PRIMARY_BUTTON}`}>
@@ -184,7 +184,7 @@ export default function MyBookingsPage() {
             return (
               <li
                 key={booking._id}
-                className="flex flex-wrap items-center gap-3.5 rounded-2xl border border-white/[0.07] bg-[#121212] p-3"
+                className="flex flex-wrap items-center gap-3.5 rounded-2xl border border-border bg-card p-3"
               >
                 <div
                   className={`size-14 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br ${thumbnailGradient(booking.studioId)}`}
@@ -203,10 +203,10 @@ export default function MyBookingsPage() {
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[14px] font-semibold tracking-[-0.01em] text-white">
+                  <p className="truncate text-[14px] font-semibold tracking-[-0.01em] text-foreground">
                     {studio?.title ?? "Studio booking"}
                   </p>
-                  <p className="mt-1 truncate text-[12px] text-neutral-400">
+                  <p className="mt-1 truncate text-[12px] text-muted-foreground">
                     {booking.date} · {booking.start} to {booking.end} · {booking.hours} hrs · ${booking.total}
                   </p>
                 </div>
@@ -243,12 +243,12 @@ export default function MyBookingsPage() {
 function BookingsSkeleton() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <div className="h-8 w-48 animate-pulse rounded-md bg-white/10" />
-      <div className="mt-3 h-4 w-72 animate-pulse rounded-md bg-white/5" />
+      <div className="h-8 w-48 animate-pulse rounded-md bg-muted" />
+      <div className="mt-3 h-4 w-72 animate-pulse rounded-md bg-muted/50" />
 
       <div className="mt-6 flex flex-wrap gap-2">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="h-7 w-20 animate-pulse rounded-full bg-white/[0.06]" />
+          <div key={i} className="h-7 w-20 animate-pulse rounded-full bg-muted" />
         ))}
       </div>
 
@@ -256,14 +256,14 @@ function BookingsSkeleton() {
         {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
-            className="flex items-center gap-3.5 rounded-2xl border border-white/[0.07] bg-[#121212] p-3"
+            className="flex items-center gap-3.5 rounded-2xl border border-border bg-card p-3"
           >
-            <div className="size-14 animate-pulse rounded-xl bg-white/[0.06]" />
+            <div className="size-14 animate-pulse rounded-xl bg-muted/50" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 w-40 animate-pulse rounded bg-white/10" />
-              <div className="h-3 w-56 animate-pulse rounded bg-white/5" />
+              <div className="h-4 w-40 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-56 animate-pulse rounded bg-muted/50" />
             </div>
-            <div className="h-6 w-20 animate-pulse rounded-full bg-white/[0.06]" />
+            <div className="h-6 w-20 animate-pulse rounded-full bg-muted" />
           </div>
         ))}
       </div>

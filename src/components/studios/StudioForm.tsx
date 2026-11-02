@@ -57,7 +57,7 @@ const INITIAL_FORM: FormState = {
 
 
 const inputClass =
-  "h-10 w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 text-[14px] text-white outline-none transition-colors placeholder:text-neutral-500 focus:border-white/30";
+  "h-10 w-full rounded-lg border border-border bg-background px-3 text-[14px] text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring";
 
 
 function Field({
@@ -71,9 +71,9 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-[12px] font-medium text-neutral-300">{label}</span>
+      <span className="text-[12px] font-medium text-foreground">{label}</span>
       <div className="mt-1.5">{children}</div>
-      {hint && <span className="mt-1 block text-[11px] text-neutral-500">{hint}</span>}
+      {hint && <span className="mt-1 block text-[11px] text-muted-foreground">{hint}</span>}
     </label>
   );
 }
@@ -89,9 +89,9 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
-      <h2 className="text-[15px] font-semibold text-white">{title}</h2>
-      <p className="mt-1 text-[12px] text-neutral-400">{subtitle}</p>
+    <section className="rounded-xl border border-border bg-card p-5">
+      <h2 className="text-[15px] font-semibold text-foreground">{title}</h2>
+      <p className="mt-1 text-[12px] text-muted-foreground">{subtitle}</p>
       <div className="mt-5">{children}</div>
     </section>
   );
@@ -187,10 +187,10 @@ const StudioForm = () => {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 text-white sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4 py-10 text-foreground sm:px-6 lg:px-8">
       <header>
-        <p className="text-[11px] text-neutral-500">
-          <Link href="/dashboard" className="transition-colors hover:text-neutral-300">
+        <p className="text-[11px] text-muted-foreground">
+          <Link href="/dashboard" className="transition-colors hover:text-foreground">
             Dashboard
           </Link>
           <span className="mx-1.5">/</span>
@@ -199,7 +199,7 @@ const StudioForm = () => {
         <h1 className="mt-3 text-[28px] font-bold tracking-[-0.02em] sm:text-[30px]">
           Add a new studio
         </h1>
-        <p className="mt-2 max-w-2xl text-[14px] text-neutral-400">
+        <p className="mt-2 max-w-2xl text-[14px] text-muted-foreground">
           List your space and start getting bookings. You can edit everything later from My Studio
           Listings.
         </p>
@@ -221,7 +221,7 @@ const StudioForm = () => {
 
               <Field label="Category">
                 <select
-                  className={`${inputClass} cursor-pointer [color-scheme:dark] [&>option]:bg-[#141414] [&>option]:text-white`}
+                  className={`${inputClass} cursor-pointer`}
                   value={form.category}
                   onChange={(event) => update("category", event.target.value)}
                 >
@@ -242,7 +242,7 @@ const StudioForm = () => {
             <div className="grid gap-4 sm:grid-cols-3">
               <Field label="Hourly rate" hint="Rounded per hour">
                 <div className="relative">
-                  <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[14px] text-neutral-500">
+                  <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[14px] text-muted-foreground">
                     $
                   </span>
                   <input
@@ -257,7 +257,7 @@ const StudioForm = () => {
 
               <Field label="Security deposit" hint="Refundable if nothing is damaged">
                 <div className="relative">
-                  <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[14px] text-neutral-500">
+                  <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[14px] text-muted-foreground">
                     $
                   </span>
                   <input
@@ -306,7 +306,7 @@ const StudioForm = () => {
               />
             </Field>
 
-            <div className="mt-4 h-52 overflow-hidden rounded-lg border border-dashed border-white/15 bg-white/[0.02]">
+            <div className="mt-4 h-52 overflow-hidden rounded-lg border border-dashed border-border bg-muted/30">
               {preview ? (
                 <img
                   src={preview}
@@ -314,7 +314,7 @@ const StudioForm = () => {
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="flex h-full items-center justify-center text-[12px] text-neutral-500">
+                <div className="flex h-full items-center justify-center text-[12px] text-muted-foreground">
                   Paste an image URL to preview it
                 </div>
               )}
@@ -336,8 +336,8 @@ const StudioForm = () => {
                     aria-pressed={selected}
                     onClick={() => toggleAmenity(amenity)}
                     className={`rounded-full border px-3 py-1.5 text-[12px] transition-colors ${selected
-                      ? "border-white/40 bg-white/10 text-white"
-                      : "border-white/10 text-neutral-400 hover:border-white/25 hover:text-neutral-200"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground hover:border-border/80 hover:text-foreground"
                       }`}
                   >
                     {amenity}
@@ -354,12 +354,12 @@ const StudioForm = () => {
             <textarea
               rows={5}
               maxLength={600}
-              className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.04] p-3 text-[14px] text-white outline-none transition-colors placeholder:text-neutral-500 focus:border-white/30"
+              className="w-full resize-none rounded-lg border border-border bg-background p-3 text-[14px] text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring"
               value={form.overview}
               onChange={(event) => update("overview", event.target.value)}
               placeholder="A minimalist white cyclorama wall with a full studio set, ideal for portraits, fashion and product shoots."
             />
-            <p className="mt-2 text-right text-[11px] text-neutral-500">
+            <p className="mt-2 text-right text-[11px] text-muted-foreground">
               {form.overview.length} / 600 characters
             </p>
           </SectionCard>
@@ -398,14 +398,14 @@ const StudioForm = () => {
             <button
               type="button"
               onClick={() => router.back()}
-              className="h-10 rounded-full px-5 text-[14px] text-neutral-300 transition-colors hover:text-white"
+              className="h-10 rounded-full px-5 text-[14px] text-muted-foreground transition-colors hover:text-foreground"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="h-10 rounded-full bg-white px-5 text-[14px] font-medium text-neutral-950 transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-10 rounded-full bg-primary px-5 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting ? "Publishing..." : "Publish studio"}
             </button>
@@ -414,7 +414,7 @@ const StudioForm = () => {
 
 
         <aside className="hidden space-y-4 lg:sticky lg:top-6 lg:block lg:self-start">
-          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+          <div className="rounded-xl border border-border bg-card p-3">
 
             {preview ? (
               <img
@@ -423,38 +423,38 @@ const StudioForm = () => {
                 className="aspect-[16/10] w-full rounded-lg object-cover"
               />
             ) : (
-              <div className="aspect-[16/10] rounded-lg bg-gradient-to-br from-blue-600/50 via-neutral-800 to-black" />
+              <div className="aspect-[16/10] rounded-lg bg-gradient-to-br from-blue-600/50 via-muted to-background" />
             )}
 
             <div className="px-1 pt-3">
-              <span className="text-[11px] text-neutral-400">{form.category}</span>
-              <h3 className="mt-1 text-[15px] font-semibold text-white">
+              <span className="text-[11px] text-muted-foreground">{form.category}</span>
+              <h3 className="mt-1 text-[15px] font-semibold text-foreground">
                 {form.title || "Your studio title"}
               </h3>
 
               <div className="mt-2 flex items-center justify-between">
-                <p className="text-[14px] font-semibold text-white">
+                <p className="text-[14px] font-semibold text-foreground">
                   ${form.hourlyRate || "0"}
-                  <span className="ml-1 text-[11px] font-normal text-neutral-400">/hr</span>
+                  <span className="ml-1 text-[11px] font-normal text-muted-foreground">/hr</span>
                 </p>
-                <span className="text-[11px] text-neutral-400">Hourly</span>
+                <span className="text-[11px] text-muted-foreground">Hourly</span>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-            <h3 className="text-[13px] font-semibold text-white">Listing tips</h3>
-            <ol className="mt-3 space-y-2 text-[11px] leading-relaxed text-neutral-400">
+          <div className="rounded-xl border border-border bg-card p-4">
+            <h3 className="text-[13px] font-semibold text-foreground">Listing tips</h3>
+            <ol className="mt-3 space-y-2 text-[11px] leading-relaxed text-muted-foreground">
               <li className="flex gap-2">
-                <span className="text-neutral-500">1.</span>
+                <span className="text-muted-foreground">1.</span>
                 <span>Lead with the space type and a location, like &quot;Sound Stage, Gulshan&quot;.</span>
               </li>
               <li className="flex gap-2">
-                <span className="text-neutral-500">2.</span>
+                <span className="text-muted-foreground">2.</span>
                 <span>Pick a deposit that covers equipment, not the full rate.</span>
               </li>
               <li className="flex gap-2">
-                <span className="text-neutral-500">3.</span>
+                <span className="text-muted-foreground">3.</span>
                 <span>List every amenity; renters filter by them.</span>
               </li>
             </ol>

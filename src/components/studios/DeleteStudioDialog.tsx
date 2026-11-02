@@ -50,7 +50,7 @@ export default function DeleteStudioDialog({
       const response = await fetch(`${API_URL}/studios/${studioId}`, {
         method: "DELETE",
         headers:{
-          // authorization: `Bearer ${token}`
+          authorization: `Bearer ${token}`
         }
       });
 

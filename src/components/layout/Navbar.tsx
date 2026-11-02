@@ -27,13 +27,14 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { authClient } from "@/lib/auth-client";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const menuItemClass =
     "flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[14px] font-medium text-foreground transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none";
 
-const API_URL = process.env.API_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 type Booking = { _id: string; status: string };
 
@@ -45,11 +46,33 @@ const Navbar = () => {
     const { data: session, isPending } = authClient.useSession();
     const user = session?.user;
     const email = user?.email;
-    function loadBookings() {
-        if (!email) return;
-        fetch(`http://localhost:8000/my-bookings/${encodeURIComponent(email)}`, { cache: "no-store" })
-            .then((res) => res.json())
-            .then((data) => setBookings(Array.isArray(data) ? data : []));
+    async function loadBookings() {
+        if (!email) {
+            setBookings([]);
+            return;
+        }
+
+        try {
+            const token = await getTokenFromClient();
+            const headers: Record<string, string> = { Accept: "application/json" };
+            if (token) headers.Authorization = `Bearer ${token}`;
+
+            const res = await fetch(`${API_URL}/my-bookings/${encodeURIComponent(email)}`, {
+                cache: "no-store",
+                credentials: "include",
+                headers,
+            });
+
+            if (!res.ok) {
+                setBookings([]);
+                return;
+            }
+
+            const data = await res.json();
+            setBookings(Array.isArray(data) ? data : []);
+        } catch {
+            setBookings([]);
+        }
     }
 
     useEffect(() => {

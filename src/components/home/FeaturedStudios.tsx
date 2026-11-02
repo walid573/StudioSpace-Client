@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Building2, Star } from "lucide-react";
 import { toDisplayImage } from "@/lib/images";
 
-// A studio document as it comes back from the Express API (GET /studios).
+
 export type Studio = {
   _id: string;
   title: string;
@@ -23,9 +23,11 @@ export type Studio = {
 
 const API_URL = process.env.API_URL ?? "http://localhost:8000";
 
-// Grab every studio, keep the live ones, then take the 6 best rated.
+
 async function getFeaturedStudios(): Promise<Studio[]> {
-  const res = await fetch(`${API_URL}/featured`, { cache: "no-store" });
+  const res = await fetch(`${API_URL}/featured`, {
+    next: { revalidate: 60 },
+  });
 
   if (!res.ok) {
     return [];
@@ -34,8 +36,7 @@ async function getFeaturedStudios(): Promise<Studio[]> {
   const studios: Studio[] = await res.json();
 
   return studios
-    // "pending" listings still need review. Studios created through the Add Studio
-    // form have no status at all, so they are treated as live rather than hidden.
+   
     .filter((studio) => Boolean(studio.title) && studio.status !== "pending")
     .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
     .slice(0, 6)
@@ -106,7 +107,7 @@ export function StudioCard({ studio }: { studio: Studio }) {
   );
 }
 
-// Shown while the studios are being fetched.
+
 export function FeaturedStudiosSkeleton() {
   return (
     <section className="bg-background text-foreground">

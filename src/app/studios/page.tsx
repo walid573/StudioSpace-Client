@@ -20,10 +20,7 @@ const API_URL = process.env.API_URL ?? "http://localhost:8000";
 async function getStudios(): Promise<Studio[]> {
     try {
         const res = await fetch(`${API_URL}/studios`, {
-            next: {
-                revalidate: 60,
-                tags: ["studios"],
-            },
+           cache:'no-cache'
         });
 
         if (!res.ok) {

@@ -31,7 +31,9 @@ const BADGE =
 
 async function getArray<T>(url: string): Promise<T[]> {
   try {
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, {
+      next: { revalidate: 60 },
+    });
     const data = res.ok ? await res.json() : [];
     return Array.isArray(data) ? data : [];
   } catch {

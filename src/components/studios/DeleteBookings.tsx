@@ -1,8 +1,10 @@
+
 "use client";
 
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,10 +16,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+
 import { toast } from "@/components/ui/toast";
 import { authClient } from "@/lib/auth-client";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 const DEFAULT_TRIGGER =
   "inline-flex h-8 items-center gap-1.5 rounded-full border border-red-500/30 px-3 text-[12px] text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-50";
@@ -38,13 +43,14 @@ export default function DeleteBooking({
   onDeleted,
 }: DeleteBookingProps) {
   const { data: session } = authClient.useSession();
+
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
   const router = useRouter();
 
   async function handleDelete() {
-    const email = session?.user?.email;
-    if (!email) {
+    if (!session?.user?.email) {
       toast.add({
         title: "Please log in again",
         description: "We couldn't find your account.",
@@ -56,31 +62,60 @@ export default function DeleteBooking({
     setDeleting(true);
 
     try {
-      const response = await fetch(
-        `${API_URL}/my-bookings/${bookingId}`,
-        { method: "DELETE" }
-      );
+     
+      const token = await getTokenFromClient();
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => null);
-        throw new Error(data?.message ?? `Request failed (${response.status})`);
+      if (!token) {
+        throw new Error(
+          "Your session has expired. Please log in again."
+        );
       }
 
+      
+      const response = await fetch(
+        `${API_URL}/my-bookings/${bookingId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message ||
+            data?.msg ||
+            `Request failed (${response.status})`
+        );
+      }
+
+     
       setOpen(false);
+
+    
       toast.add({
         title: "Booking deleted",
         description: studioTitle
           ? `Your booking for ${studioTitle} has been removed.`
           : "Your booking has been removed.",
         type: "success",
-        
       });
-      router.refresh();
+
+  
       onDeleted(bookingId);
-    } catch {
+      router.refresh();
+    } catch (error) {
+      console.error("Delete booking error:", error);
+
       toast.add({
         title: "Couldn't delete booking",
-        description: "Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Please try again.",
         type: "error",
       });
     } finally {
@@ -90,31 +125,36 @@ export default function DeleteBooking({
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger className={triggerClassName} disabled={deleting}>
+      <AlertDialogTrigger
+        className={triggerClassName}
+        disabled={deleting}
+      >
         <Trash2 className="size-3.5" aria-hidden="true" />
         {label}
       </AlertDialogTrigger>
 
-      <AlertDialogContent className="dark border border-white/10 bg-[#111111] text-white">
+      <AlertDialogContent className="dark border border-white/10 bg-card text-white">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-white">Delete this booking?</AlertDialogTitle>
+          <AlertDialogTitle className="text-white">
+            Delete this booking?
+          </AlertDialogTitle>
+
           <AlertDialogDescription className="text-neutral-400">
-            {studioTitle ? (
-              <>
-                Your booking for &quot;{studioTitle}&quot; will be permanently removed.
-              </>
-            ) : (
-              "This booking will be permanently removed."
-            )}{" "}
-            This can&apos;t be undone.
+            {studioTitle
+              ? `Your booking for "${studioTitle}" will be permanently removed.`
+              : "This booking will be permanently removed."}{" "}
+            This can't be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={deleting}>
+            Cancel
+          </AlertDialogCancel>
+
           <AlertDialogAction
             onClick={(event) => {
-              event.preventDefault(); // keep the dialog open until the request finishes
+              event.preventDefault();
               handleDelete();
             }}
             disabled={deleting}

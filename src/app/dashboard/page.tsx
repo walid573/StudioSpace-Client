@@ -32,15 +32,17 @@ type Booking = {
 
 
 async function getStudios(): Promise<Studio[]> {
-  const response = await fetch(`${API_URL}/studios`, { cache: "no-store" });
-  if (!response.ok) return []; // if the request failed, return an empty list
+  const response = await fetch(`${API_URL}/studios`, {
+    next: { revalidate: 60 },
+  });
+  if (!response.ok) return []; 
   return response.json();
 }
 
 
 async function getBookings(email: string): Promise<Booking[]> {
   const response = await fetch(`${API_URL}/my-bookings/${encodeURIComponent(email)}`, {
-    cache: "no-store",
+    next: { revalidate: 30 },
   });
   if (!response.ok) return [];
   return response.json();

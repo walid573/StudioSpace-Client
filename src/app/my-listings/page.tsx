@@ -39,7 +39,7 @@ async function getMyListings(email: string): Promise<Listing[]> {
   const token = await getTokenFromServer()
    
   const fetchOptions: RequestInit = {
-    cache: "no-store",
+    next: { revalidate: 30 },
     credentials: "include",
   };
 
@@ -158,7 +158,7 @@ export default async function MyListingsPage() {
                   const place =
                     [listing.location?.area, listing.location?.city].filter(Boolean).join(", ") ||
                     "—";
-                  // Plain <img>, so base64 (`data:`) uploads render too.
+                 
                   const thumbnail = listing.imageUrl?.trim() || undefined;
 
                   return (

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/toast";
 import { useRouter } from "next/navigation";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -88,7 +89,7 @@ export default function EditBooking({
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(() => toForm(booking));
   const [saving, setSaving] = useState(false);
-    const router = useRouter()
+  const router = useRouter();
   const hours = form.start && form.end ? (toMinutes(form.end) - toMinutes(form.start)) / 60 : 0;
   const validRange = hours > 0;
 
@@ -117,9 +118,18 @@ export default function EditBooking({
     setSaving(true);
 
     try {
+      const token = await getTokenFromClient();
+      if (!token) {
+        throw new Error("Your session has expired. Please sign in again.");
+      }
+
       const response = await fetch(`${API_URL}/my-bookings/${booking._id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           date: form.date,
           start: form.start,
@@ -134,7 +144,7 @@ export default function EditBooking({
       }
 
       setOpen(false);
-      router.refresh()
+      router.refresh();
       toast.add({
         title: "Booking updated",
         description: studioTitle

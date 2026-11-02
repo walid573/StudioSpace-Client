@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 import EditBooking, { Booking, Studio } from "@/components/studios/EditBookings";
 import DeleteBooking from "@/components/studios/DeleteBookings";
 
@@ -63,7 +64,7 @@ export default function MyBookingsPage() {
   const [studios, setStudios] = useState<Studio[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load bookings + studios once we know who the user is
+  
   useEffect(() => {
     if (isPending) return;
     if (!email) {
@@ -75,9 +76,17 @@ export default function MyBookingsPage() {
 
     async function loadData() {
       try {
+        const token = await getTokenFromClient();
+        const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
+        const opts: RequestInit = {
+          cache: "no-store",
+          headers: authHeaders,
+        };
+
         const [bookingsRes, studiosRes] = await Promise.all([
-          fetch(`${API_URL}/my-bookings/${encodeURIComponent(email!)}`, { cache: "no-store" }),
-          fetch(`${API_URL}/studios`, { cache: "no-store" }),
+          fetch(`${API_URL}/my-bookings/${encodeURIComponent(email!)}`, opts),
+          fetch(`${API_URL}/studios`, opts),
         ]);
         const bookingData = await bookingsRes.json();
         const studioData = studiosRes.ok ? await studiosRes.json() : [];
@@ -98,12 +107,12 @@ export default function MyBookingsPage() {
     };
   }, [email, isPending, router]);
 
-  // Called by DeleteBooking after the server deleted the booking
+  
   function handleDeleted(id: string) {
     setBookings((current) => current.filter((b) => b._id !== id));
   }
 
-  // Called by EditBooking after the server saved the changes
+ 
   function handleUpdated(updated: Booking) {
     setBookings((current) => current.map((b) => (b._id === updated._id ? updated : b)));
   }

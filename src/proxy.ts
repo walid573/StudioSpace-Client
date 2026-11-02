@@ -5,7 +5,7 @@ import { headers } from 'next/headers'
 
 
 export async function proxy(request: NextRequest) {
-  // Public browsing should remain available without auth; only management flows are protected.
+ 
   if (
     request.nextUrl.pathname === "/studios/about-us" ||
     request.nextUrl.pathname === "/studios" ||

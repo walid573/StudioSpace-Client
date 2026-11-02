@@ -66,7 +66,9 @@ const categoryHref = (category: string) =>
 
 async function getStudios(): Promise<StudioSummary[]> {
     try {
-        const response = await fetch(`${API_URL}/studios`, { cache: "no-store" });
+        const response = await fetch(`${API_URL}/studios`, {
+            next: { revalidate: 60 },
+        });
         if (!response.ok) return [];
         const data = await response.json();
         return Array.isArray(data) ? data : [];

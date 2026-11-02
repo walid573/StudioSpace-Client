@@ -205,7 +205,7 @@ export default function EditStudioDialog({
         {label}
       </DialogTrigger>
 
-      <DialogContent className="dark max-h-[85vh] overflow-y-auto border border-white/10 bg-[#111111] text-white sm:max-w-2xl">
+      <DialogContent className="dark max-h-[85vh] overflow-y-auto border border-white/10 bg-card text-white sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-[16px] font-semibold text-white">Edit studio</DialogTitle>
           <DialogDescription className="text-[12px] text-neutral-400">
@@ -226,7 +226,7 @@ export default function EditStudioDialog({
 
             <Field label="Category">
               <select
-                className={`${inputClass} cursor-pointer [color-scheme:dark] [&>option]:bg-[#141414] [&>option]:text-white`}
+                className={`${inputClass} cursor-pointer [color-scheme:dark] [&>option]:bg-popover [&>option]:text-white`}
                 value={form.category}
                 onChange={(event) => update("category", event.target.value)}
               >

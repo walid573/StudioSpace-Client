@@ -1,15 +1,18 @@
-'use client'
+
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+
 import {
     CalendarDays,
     CirclePlus,
     LayoutGrid,
     List,
     LogOut,
+    Menu,
     UserRound,
 } from "lucide-react";
 
@@ -18,6 +21,7 @@ import {
     AvatarFallback,
     AvatarImage,
 } from "@/components/ui/avatar";
+
 import {
     Popover,
     PopoverContent,
@@ -26,26 +30,64 @@ import {
     PopoverTitle,
     PopoverTrigger,
 } from "@/components/ui/popover";
+
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+    SheetClose,
+} from "@/components/ui/sheet";
+
 import { authClient } from "@/lib/auth-client";
 import { getTokenFromClient } from "@/lib/getTokenFromClient";
-import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
 
+const API_URL =
+    process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+type Booking = {
+    _id: string;
+    status: string;
+};
+
+const navLinks = [
+    { name: "Home", href: "/" },
+    { name: "Explore Studios", href: "/studios" },
+    { name: "How It Works", href: "/how-it-works" },
+    { name: "About Us", href: "/about-us" },
+];
+
+const accountLinks = [
+    { name: "Profile", href: "/profile", icon: UserRound },
+    { name: "Dashboard", href: "/dashboard", icon: LayoutGrid },
+    { name: "Add New Studio", href: "/add-studio", icon: CirclePlus },
+    { name: "My Studio Listings", href: "/my-listings", icon: List },
+    { name: "My Bookings", href: "/my-bookings", icon: CalendarDays },
+];
+
 const menuItemClass =
-    "flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[14px] font-medium text-foreground transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
-type Booking = { _id: string; status: string };
-
+    "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-accent";
 
 const Navbar = () => {
     const pathname = usePathname();
     const router = useRouter();
+
     const [bookings, setBookings] = useState<Booking[]>([]);
+
     const { data: session, isPending } = authClient.useSession();
+
     const user = session?.user;
     const email = user?.email;
+    const bookingCount = bookings.length;
+
+    const isActive = (href: string) =>
+        href === "/"
+            ? pathname === "/"
+            : pathname === href || pathname.startsWith(`${href}/`);
+
     async function loadBookings() {
         if (!email) {
             setBookings([]);
@@ -54,14 +96,23 @@ const Navbar = () => {
 
         try {
             const token = await getTokenFromClient();
-            const headers: Record<string, string> = { Accept: "application/json" };
-            if (token) headers.Authorization = `Bearer ${token}`;
 
-            const res = await fetch(`${API_URL}/my-bookings/${encodeURIComponent(email)}`, {
-                cache: "no-store",
-                credentials: "include",
-                headers,
-            });
+            const headers: Record<string, string> = {
+                Accept: "application/json",
+            };
+
+            if (token) {
+                headers.Authorization = `Bearer ${token}`;
+            }
+
+            const res = await fetch(
+                `${API_URL}/my-bookings/${encodeURIComponent(email)}`,
+                {
+                    cache: "no-store",
+                    
+                    headers,
+                }
+            );
 
             if (!res.ok) {
                 setBookings([]);
@@ -69,8 +120,14 @@ const Navbar = () => {
             }
 
             const data = await res.json();
+            
+
+console.log("My bookings:", data);
+
+
             setBookings(Array.isArray(data) ? data : []);
-        } catch {
+        } catch (error) {
+            console.error("Failed to load bookings:", error);
             setBookings([]);
         }
     }
@@ -79,69 +136,86 @@ const Navbar = () => {
         loadBookings();
     }, [email]);
 
-    const bookingCount = bookings.length
     async function handleSignOut() {
-        await authClient.signOut();
-        router.replace("/");
+        try {
+            await authClient.signOut();
+            setBookings([]);
+            router.replace("/");
+            router.refresh();
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
     }
-    const navLinks = [
-        { name: "Home", href: "/" },
-        { name: "Explore Studios", href: "/studios" },
-        { name: "How It Works", href: "/how-it-works" },
-        { name: "About Us", href: "/about-us" },
-    ];
 
     return (
-        <nav className="border-b border-border">
-            <div className="mx-auto grid max-w-7xl grid-cols-2 items-center gap-4 px-4 py-4 sm:px-6 md:grid-cols-3 lg:px-8">
-                <div>
-                    <Link href={'/'} className="flex gap-2 items-center ">
-                        <Image src='/logo.png' alt="StudioSpace logo" width={28} height={28} ></Image>
-                        <h2 className="text-xl whitespace-nowrap text-foreground">StudioSpace</h2>
-                    </Link>
+        <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-xl">
+            <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+
+               
+                <Link
+                    href="/"
+                    className="flex shrink-0 items-center gap-2"
+                >
+                    <Image
+                        src="/logo.png"
+                        alt="StudioSpace logo"
+                        width={32}
+                        height={32}
+                        priority
+                    />
+
+                    <span className="whitespace-nowrap text-lg font-bold tracking-tight sm:text-xl">
+                        StudioSpace
+                    </span>
+                </Link>
+
+              
+                <div className="hidden items-center gap-1 md:flex">
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.name}
+                            href={link.href}
+                            className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                                isActive(link.href)
+                                    ? "bg-primary/10 text-primary"
+                                    : "text-foreground/75 hover:bg-accent hover:text-foreground"
+                            }`}
+                        >
+                            {link.name}
+                        </Link>
+                    ))}
                 </div>
 
-                <div className="hidden gap-2 md:flex">
-                    {navLinks.map((link) => {
-                        const isActive = pathname === link.href;
+             
+                <div className="flex shrink-0 items-center gap-2">
 
-                        return (
-                            <Link
-                                key={link.name}
-                                href={link.href}
-                                className={`whitespace-nowrap px-3 py-2 text-sm font-medium transition-colors ${isActive
-                                    ? "border-b-2 border-primary text-foreground"
-                                    : "text-foreground/80 hover:text-foreground"
-                                    }`}
-                            >
-                                {link.name}
-                            </Link>
-                        );
-                    })}
-                </div>
+                   
+                    <ThemeToggle />
 
-                <div className="flex gap-2 justify-end">
+                   
                     {isPending ? (
-                        <div
-                            aria-hidden="true"
-                            className="size-9 animate-pulse rounded-full bg-muted"
-                        />
+                        <div className="size-9 animate-pulse rounded-full bg-muted" />
                     ) : user ? (
-                        <>
-                          <ThemeToggle />
-                          <Popover onOpenChange={(open) => open && loadBookings()}>
+
+                        
+                        <Popover
+                            onOpenChange={(open) => {
+                                if (open) loadBookings();
+                            }}
+                        >
                             <PopoverTrigger
                                 aria-label="Open account menu"
-                                className="cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                                className="rounded-full outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring"
                             >
-                                <Avatar size="lg" className="size-9 transition-opacity hover:opacity-85">
+                                <Avatar className="size-9 border border-border">
                                     <AvatarImage
+                                        src={user.image ?? undefined}
+                                        alt={user.name ?? "Profile"}
                                         referrerPolicy="no-referrer"
-                                        src={user?.image ?? undefined}
-                                        alt={user?.name ?? "Profile"}
                                     />
-                                    <AvatarFallback className="bg-primary text-md font-medium text-primary-foreground">
-                                        {user?.name?.charAt(0) ?? "U"}
+
+                                    <AvatarFallback className="bg-primary font-semibold text-primary-foreground">
+                                        {user.name?.charAt(0) ?? "U"}
                                     </AvatarFallback>
                                 </Avatar>
                             </PopoverTrigger>
@@ -149,89 +223,160 @@ const Navbar = () => {
                             <PopoverContent
                                 align="end"
                                 sideOffset={10}
-                                className="relative w-[300px] gap-0 rounded-xl bg-popover p-0 text-popover-foreground shadow-[0_18px_45px_rgba(0,0,0,0.22)] ring-border"
+                                className="w-[290px] gap-0 rounded-xl p-0"
                             >
-                                <span
-                                    aria-hidden="true"
-                                    className="absolute -top-[5px] right-[13px] size-2.5 rotate-45 rounded-[2px] border-t border-l border-border bg-popover"
-                                />
+                               
+                                <PopoverHeader className="px-4 py-4">
+                                    <div className="flex items-center gap-3">
+                                        <Avatar className="size-10">
+                                            <AvatarImage
+                                                src={user.image ?? undefined}
+                                                alt={user.name ?? "Profile"}
+                                                referrerPolicy="no-referrer"
+                                            />
 
-                                <PopoverHeader className="px-5 pt-4 pb-3">
-                                    <PopoverTitle className="text-[15px] font-semibold text-popover-foreground">
-                                        {user?.name}
-                                    </PopoverTitle>
-                                    <PopoverDescription className="mt-0.5 text-[12px] text-muted-foreground">
-                                        {user?.email}
-                                    </PopoverDescription>
+                                            <AvatarFallback className="bg-primary text-primary-foreground">
+                                                {user.name?.charAt(0) ?? "U"}
+                                            </AvatarFallback>
+                                        </Avatar>
+
+                                        <div className="min-w-0">
+                                            <PopoverTitle className="truncate text-sm font-semibold">
+                                                {user.name}
+                                            </PopoverTitle>
+
+                                            <PopoverDescription className="truncate text-xs">
+                                                {user.email}
+                                            </PopoverDescription>
+                                        </div>
+                                    </div>
                                 </PopoverHeader>
 
-                                <div className="mx-5 h-px bg-border" />
+                                <div className="h-px bg-border" />
 
-                                <div className="px-4 py-1.5">
-                                    <button type="button" className={menuItemClass}>
-                                        <UserRound className="size-[18px] shrink-0 text-muted-foreground" strokeWidth={1.8} />
-                                        <Link href={'/profile'} className="text-popover-foreground">Profile</Link>
+                                
+                                <div className="p-2">
+                                    {accountLinks.map((item) => {
+                                        const Icon = item.icon;
 
-                                    </button>
+                                        return (
+                                            <Link
+                                                key={item.name}
+                                                href={item.href}
+                                                className={menuItemClass}
+                                            >
+                                                <Icon className="size-[18px] shrink-0 text-muted-foreground" />
 
-                                    <button type="button" className={menuItemClass}>
-                                        <LayoutGrid className="size-[18px] shrink-0 text-muted-foreground" strokeWidth={1.8} />
-                                        <Link href={'/dashboard'} className="text-popover-foreground">Dashboard</Link>
+                                                <span>{item.name}</span>
 
-                                    </button>
+                                                {item.name === "My Bookings" && (
+                                                    <span className="ml-auto flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground">
+                                                        {bookingCount}
+                                                    </span>
+                                                )}
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
 
-                                    <button type="button" className={menuItemClass}>
-                                        <CirclePlus className="size-[18px] shrink-0 text-muted-foreground" strokeWidth={1.8} />
-                                        <Link href={'/add-studio'} className="text-popover-foreground">Add New Studio</Link>
+                                <div className="mx-3 h-px bg-border" />
 
-                                    </button>
-
-                                    <button type="button" className={menuItemClass}>
-                                        <List className="size-[18px] shrink-0 text-muted-foreground" strokeWidth={1.8} />
-                                        <Link href={'/my-listings'} className="text-popover-foreground">My Studio Listings</Link>
-
-                                    </button>
-
-                                    <button type="button" className={menuItemClass}>
-                                        <CalendarDays className="size-[18px] shrink-0 text-muted-foreground" strokeWidth={1.8} />
-                                        <Link href={'/my-bookings'} className="text-popover-foreground">My Bookings</Link>
-
-                                        <span className="ml-auto inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground">
-                                            {bookingCount}
-                                        </span>
-                                    </button>
-
-                                    <div className="mx-1 my-1.5 h-px bg-border" />
-
+                               
+                                <div className="p-2">
                                     <button
                                         type="button"
                                         onClick={handleSignOut}
-                                        className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[14px] font-medium text-destructive transition-colors hover:bg-destructive/10 focus-visible:bg-destructive/10 focus-visible:outline-none"
+                                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
                                     >
-                                        <LogOut className="size-[18px] shrink-0" strokeWidth={1.8} />
+                                        <LogOut className="size-[18px]" />
                                         Logout
                                     </button>
                                 </div>
                             </PopoverContent>
-                          </Popover>
-                        </>
+                        </Popover>
+
                     ) : (
-                        <>
-                            <ThemeToggle />
+
+                        
+                        
+                        <div className="flex items-center gap-2">
                             <Link
                                 href="/login"
-                                className="inline-flex items-center justify-center rounded-2xl border border-border px-4 py-2 text-sm font-medium whitespace-nowrap text-foreground transition-colors hover:bg-accent"
+                                className="rounded-lg border border-border px-3 py-2 text-xs font-semibold transition-colors hover:bg-accent sm:px-4 sm:text-sm"
                             >
                                 Login
                             </Link>
+
                             <Link
                                 href="/register"
-                                className="inline-flex items-center justify-center rounded-3xl bg-primary px-4 py-2 text-sm font-medium whitespace-nowrap text-primary-foreground transition-colors hover:bg-primary/90"
+                                className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 sm:px-4 sm:text-sm"
                             >
                                 Register
                             </Link>
-                        </>
+                        </div>
                     )}
+
+                    
+                    <Sheet>
+                        <SheetTrigger asChild>
+                            <button
+                                type="button"
+                                aria-label="Open navigation menu"
+                                className="inline-flex size-9 items-center justify-center rounded-lg border border-border bg-background transition-colors hover:bg-accent md:hidden"
+                            >
+                                <Menu className="size-5" />
+                            </button>
+                        </SheetTrigger>
+
+                        <SheetContent
+                            side="right"
+                            className="w-[280px] border-l border-border bg-background p-0 sm:w-[320px]"
+                        >
+                         
+                         
+                            <SheetHeader className="border-b border-border px-5 py-6 text-left">
+                                <SheetTitle className="flex items-center gap-2 text-xl font-bold">
+                                    <Image
+                                        src="/logo.png"
+                                        alt="StudioSpace logo"
+                                        width={30}
+                                        height={30}
+                                    />
+                                    StudioSpace
+                                </SheetTitle>
+
+                                <SheetDescription className="text-xs leading-relaxed">
+                                    Find the perfect creative space for your next project.
+                                </SheetDescription>
+                            </SheetHeader>
+
+                            
+                            <nav className="flex flex-col gap-2 px-4 py-6">
+                                <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                                    Navigation
+                                </p>
+
+                                {navLinks.map((link) => (
+                                    <SheetClose asChild key={link.name}>
+                                        <Link
+                                            href={link.href}
+                                            className={`flex items-center rounded-xl px-4 py-3 text-sm font-semibold transition-all ${
+                                                isActive(link.href)
+                                                    ? "bg-primary/10 text-primary"
+                                                    : "text-foreground hover:bg-accent"
+                                            }`}
+                                        >
+                                            {link.name}
+
+                                            {isActive(link.href) && (
+                                                <span className="ml-auto size-1.5 rounded-full bg-primary" />
+                                            )}
+                                        </Link>
+                                    </SheetClose>
+                                ))}
+                            </nav>
+                        </SheetContent>
+                    </Sheet>
                 </div>
             </div>
         </nav>

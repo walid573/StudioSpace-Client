@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { auth } from "@/lib/auth";
 import EditProfileDialog from "@/components/profile/EditProfileDialog";
 
-const API_URL = process.env.API_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export const instant = false;
 

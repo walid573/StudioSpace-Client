@@ -5,7 +5,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Search, SearchX } from "lucide-react";
-
+import {  useSearchParams } from "next/navigation";
 
 export type Studio = {
     _id: string;
@@ -23,10 +23,21 @@ export type Studio = {
 };
 
 const ExploreStudio = ({ studios }: { studios: Studio[] }) => {
-   
-    const [query, setQuery] = useState("");
-    const [category, setCategory] = useState("All");
+    const searchParams = useSearchParams();
+    
 
+    
+    const category = searchParams.get("category") ?? "All";
+
+    const [query, setQuery] = useState("");
+
+    
+    function setCategory(next: string) {
+        const url = next === "All" ? "/studios" : `/studios?category=${encodeURIComponent(next)}`;
+        window.history.replaceState(null, "", url);
+    }
+    
+    
  
     const categories = ["All", ...new Set(studios.map((studio) => studio.category))];
 
@@ -36,7 +47,7 @@ const ExploreStudio = ({ studios }: { studios: Studio[] }) => {
 
         const searchText = `${studio.title} ${studio.location?.area ?? ""} ${studio.location?.city ?? ""}`;
         const matchesSearch = searchText.toLowerCase().includes(query.trim().toLowerCase());
-
+        
         return matchesCategory && matchesSearch;
     });
 

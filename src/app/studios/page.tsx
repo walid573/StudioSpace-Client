@@ -22,8 +22,7 @@ async function getStudios(): Promise<Studio[]> {
 
     const studios: Studio[] = await res.json();
 
-    // Only skip documents that are too incomplete to render. A missing photo is
-    // fine — the card falls back to a placeholder instead of hiding the studio.
+    
     return studios
         .filter((studio) => Boolean(studio.title && studio.category))
         .map((studio) => ({

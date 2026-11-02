@@ -99,7 +99,7 @@ const CatergorySection = async () => {
                         <h2 className="text-[26px] font-bold tracking-[-0.02em] text-white sm:text-[28px]">
                             Browse by category
                         </h2>
-                        <p className="mt-2 text-[12px] text-amber-400">
+                        <p className="mt-2  text-[15px] text-neutral-400">
                             Jump straight to the kind of space you need.
                         </p>
                     </div>

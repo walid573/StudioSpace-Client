@@ -124,7 +124,7 @@ export default function MyBookingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 text-white sm:px-6">
+    <div className="mx-auto max-w-5xl min-h-[65vh] px-4 py-10 text-white sm:px-6">
       <header className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-[26px] font-bold tracking-[-0.02em]">My bookings</h1>

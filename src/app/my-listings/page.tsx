@@ -81,7 +81,7 @@ export default async function MyListingsPage() {
   const count = listings.length;
 
   return (
-    <div className="mx-auto min-h-[60vh] max-w-5xl px-4 py-10 text-white sm:px-6">
+    <div className="mx-auto min-h-[65vh] max-w-5xl px-4 py-10 text-white sm:px-6">
       <header className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-[26px] font-bold tracking-[-0.02em] sm:text-[28px]">

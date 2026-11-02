@@ -1,10 +1,13 @@
-import { createAuthClient } from "better-auth/react";
+import { jwtClient } from "better-auth/client/plugins"
+import { createAuthClient } from "better-auth/react"
 
-/**
- * The auth server lives on the same origin (src/app/api/auth/[...all]/route.ts),
- * so the client can infer its base URL. `BETTER_AUTH_URL` is a server-only env
- * var and is not exposed to the browser.
- */
-export const authClient = createAuthClient();
+const clientBaseUrl =
+  process.env.NEXT_PUBLIC_BETTER_AUTH_URL ??
+  (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
+
+export const authClient = createAuthClient({
+  baseURL: clientBaseUrl,
+  plugins: [jwtClient()],
+});
 
 export const { signIn, signUp, useSession } = authClient;

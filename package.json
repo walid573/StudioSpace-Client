@@ -12,7 +12,7 @@
     "@base-ui/react": "^1.9.0",
     "@better-auth/mongo-adapter": "^1.7.14",
     "@shadcn/react": "^0.3.1",
-    "better-auth": "^1.7.14",
+    "better-auth": "^1.7.15",
     "class-variance-authority": "^0.7.1",
     "cmdk": "^1.1.1",
     "cn": "^0.5.1",

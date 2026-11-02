@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { isImageSource } from "@/lib/images";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -140,8 +141,7 @@ const StudioForm = () => {
       address: form.address.trim(),
     };
 
-    // Only store something the browser can actually render as an image. A typo in
-    // this field used to be saved verbatim and then crashed `next/image` later.
+    
     const coverImage = isImageSource(form.imageUrl) ? form.imageUrl.trim() : "";
 
     const result = {
@@ -164,11 +164,14 @@ const StudioForm = () => {
     };
 
     setSubmitting(true);
-
+    const token = await getTokenFromClient()
+    
     try {
       const response = await fetch(`${API_URL}/studios`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+          authorization: `Bearer ${token}`
+         },
         body: JSON.stringify(result),
       });
 

@@ -16,10 +16,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 import { isImageSource } from "@/lib/images";
 import DeleteStudioDialog from "@/components/studios/DeleteStudioDialog";
 import EditStudioDialog, { type EditableStudio } from "@/components/studios/EditStudioDialog";
-
 
 // Client components only see NEXT_PUBLIC_* variables
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -71,25 +71,41 @@ const DEFAULT_REVIEWS = [
 ];
 
 async function getStudio(studioId: string): Promise<any | null> {
-  const safeId = encodeURIComponent(decodeURIComponent(studioId).trim());
+  const decoded = decodeURIComponent(studioId).trim();
+  const safeId = encodeURIComponent(decoded);
+
   try {
-    const res = await fetch(`${API_URL}/studios/${safeId}`, { cache: "no-store" });
-    if (res.ok) return await res.json();
+    const token = await getTokenFromClient();
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
 
-    const allRes = await fetch(`${API_URL}/studios`, { cache: "no-store" });
-    if (!allRes.ok) return null;
+    // Drop credentials: "include" — you're using a Bearer token, not cookies.
+    // This avoids the strict CORS credentials requirement.
+    const res = await fetch(`${API_URL}/studios/${safeId}`, {
+      cache: "no-store",
+      headers,
+    });
 
-    const studios = await allRes.json();
-    return (
-      studios.find((s: any) => s._id === studioId || s.slug === decodeURIComponent(studioId).trim()) ??
-      null
-    );
+    if (res.ok) {
+      const json = await res.json();
+      return json?.studio ?? json?.data ?? json; // tolerate wrapped responses
+    }
+    console.warn("GET /studios/:id failed", res.status, await res.text());
+
+    const allRes = await fetch(`${API_URL}/studios`, { cache: "no-store", headers });
+    if (!allRes.ok) {
+      console.warn("GET /studios failed", allRes.status);
+      return null;
+    }
+
+    const body = await allRes.json();
+    const list = Array.isArray(body) ? body : (body?.studios ?? body?.data ?? []);
+    return list.find((s: any) => s._id === decoded || s.slug === decoded) ?? null;
   } catch (error) {
-    console.error("Error fetching studio:", error);
+    console.error("Error fetching studio:", error); // check this in the console
     return null;
   }
 }
-
 function normalizeCapacity(value: unknown): string {
   if (typeof value === "number") {
     return `Up to ${value} people`;
@@ -167,7 +183,7 @@ function GalleryCarousel({ images }: { images: string[] }) {
 
   return (
     <div>
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+      <div className="overflow-hidden rounded-2xl border border-border bg-muted/40">
         {isGradient(current) ? (
           <div
             role="img"
@@ -187,7 +203,7 @@ function GalleryCarousel({ images }: { images: string[] }) {
           <div
             role="img"
             aria-label="Studio gallery preview"
-            className="aspect-[5/3] w-full bg-gradient-to-br from-neutral-800 via-neutral-900 to-black"
+            className="aspect-[5/3] w-full bg-gradient-to-br from-muted via-background to-border"
           />
         )}
       </div>
@@ -203,9 +219,9 @@ function GalleryCarousel({ images }: { images: string[] }) {
               onClick={() => setSelected(index)}
               aria-label={`Show gallery image ${index + 1}`}
               aria-pressed={active}
-              className={`aspect-[5/3] overflow-hidden rounded-lg border p-0 transition duration-200 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none ${active
-                  ? "border-white/60 opacity-100"
-                  : "border-white/10 opacity-50 hover:opacity-90"
+              className={`aspect-[5/3] overflow-hidden rounded-lg border p-0 transition duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${active
+                  ? "border-border opacity-100"
+                  : "border-border/70 opacity-50 hover:opacity-90"
                 }`}
             >
               {isGradient(image) ? (
@@ -213,7 +229,7 @@ function GalleryCarousel({ images }: { images: string[] }) {
               ) : isImageSource(image) ? (
                 <img src={image} alt="" className="size-full object-cover" />
               ) : (
-                <div className="size-full bg-white/5" />
+                <div className="size-full bg-muted" />
               )}
             </button>
           );
@@ -302,9 +318,14 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
     setMessage(null);
 
     try {
+      const token = await getTokenFromClient();
       const res = await fetch(`${API_URL}/my-bookings`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: "include",
         body: JSON.stringify({
           studioId: studio._id,
           userEmail: user.email,
@@ -373,7 +394,12 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
 
   const locationLabel = [studio.location.area, studio.location.city].filter(Boolean).join(", ");
   const total = Math.round(hours * studio.hourlyRate * 100) / 100;
-  const canManage = Boolean(user);
+  const isOwner =
+    !!user &&
+    !!user.email &&
+    !!studio.ownerEmail &&
+    user.email.toLowerCase() === studio.ownerEmail.toLowerCase();
+  const canManage = isOwner;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -412,18 +438,18 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
               )}
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-neutral-400 sm:text-[15px]">
+            <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-muted-foreground sm:text-[15px]">
               <span>{locationLabel}</span>
               <span aria-hidden>•</span>
               <span>{studio.capacity}</span>
               <span aria-hidden>•</span>
-              <span className="inline-flex items-center gap-1 text-neutral-300">
+              <span className="inline-flex items-center gap-1 text-foreground">
                 <Star className="size-3.5 fill-current text-yellow-400" />
                 {studio.rating.toFixed(1)} rating
               </span>
             </div>
 
-            <p className="mt-4 max-w-[64ch] text-[15px] leading-7 text-neutral-400">
+            <p className="mt-4 max-w-[64ch] text-[15px] leading-7 text-muted-foreground">
               {studio.description}
             </p>
 
@@ -612,7 +638,7 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
 // Exported for use as a Suspense fallback
 export function StudioDetailSkeleton() {
   return (
-    <div className="dark min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
         <Skeleton className="h-6 w-36" />
         <div className="mt-8 grid gap-8 md:grid-cols-[minmax(0,1fr)_320px] md:gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-10">

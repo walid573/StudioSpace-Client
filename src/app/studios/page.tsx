@@ -1,3 +1,4 @@
+
 import { Suspense } from "react";
 import ExploreStudio, {
     ExploreStudioSkeleton,
@@ -7,31 +8,47 @@ import { toDisplayImage } from "@/lib/images";
 
 export const metadata = {
     title: "Explore Studios | StudioSpace",
-    description: "Browse photo studios, film stages, podcast rooms and music suites by category and location.",
+    description:
+        "Browse photo studios, film stages, podcast rooms and music suites by category and location.",
 };
 
 const API_URL = process.env.API_URL ?? "http://localhost:8000";
 
-export const instant = false;
+
+
 
 async function getStudios(): Promise<Studio[]> {
-    const res = await fetch(`${API_URL}/studios`, { cache: "no-store" });
+    try {
+        const res = await fetch(`${API_URL}/studios`, {
+            next: {
+                revalidate: 60,
+                tags: ["studios"],
+            },
+        });
 
-    if (!res.ok) {
+        if (!res.ok) {
+            console.error("Failed to fetch studios:", res.status);
+            return [];
+        }
+
+        const studios: Studio[] = await res.json();
+
+        return studios
+            .filter(
+                (studio) =>
+                    Boolean(studio.title && studio.category)
+            )
+            .map((studio) => ({
+                ...studio,
+                imageUrl: studio.imageUrl
+                    ? toDisplayImage(studio.imageUrl)
+                    : "",
+            }));
+    } catch (error) {
+        console.error("Error fetching studios:", error);
         return [];
     }
-
-    const studios: Studio[] = await res.json();
-
-    
-    return studios
-        .filter((studio) => Boolean(studio.title && studio.category))
-        .map((studio) => ({
-            ...studio,
-            imageUrl: toDisplayImage(studio.imageUrl),
-        }));
 }
-
 
 async function StudioList() {
     const studios = await getStudios();
@@ -39,12 +56,10 @@ async function StudioList() {
     return <ExploreStudio studios={studios} />;
 }
 
-const StudioPage = () => {
+export default function StudioPage() {
     return (
         <Suspense fallback={<ExploreStudioSkeleton />}>
             <StudioList />
         </Suspense>
     );
-};
-
-export default StudioPage;
+}

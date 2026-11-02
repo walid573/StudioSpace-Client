@@ -7,6 +7,7 @@ import { CirclePlus } from "lucide-react";
 import { auth } from "@/lib/auth";
 import DeleteStudioDialog from "@/components/studios/DeleteStudioDialog";
 import EditStudioDialog from "@/components/studios/EditStudioDialog";
+import { getTokenFromServer } from "@/lib/getTokenFromSever";
 
 const API_URL = process.env.API_URL ?? "http://localhost:8000";
 
@@ -34,19 +35,36 @@ type Listing = {
 };
 
 async function getMyListings(email: string): Promise<Listing[]> {
-  const response = await fetch(`${API_URL}/studios`, { cache: "no-store" });
+ 
+  const token = await getTokenFromServer()
+   
+  const fetchOptions: RequestInit = {
+    cache: "no-store",
+    credentials: "include",
+  };
 
-  if (!response.ok) {
-    return [];
+  if (token) {
+    fetchOptions.headers = {
+            Authorization: "Bearer " + token,
+      "Content-Type": "application/json",
+    };
   }
 
-  const studios: Listing[] = await response.json();
+  try {
+    const response = await fetch(
+      "" + API_URL + "/my-listings/" + encodeURIComponent(email),
+      fetchOptions,
+    );
 
-  return studios.filter(
-    (studio) =>
-      studio.title &&
-      (studio.ownerEmail ?? studio.hostEmail)?.toLowerCase() === email.toLowerCase()
-  );
+    if (!response.ok) {
+      return [];
+    }
+
+    const studios: Listing[] = await response.json();
+    return Array.isArray(studios) ? studios.filter((studio) => studio.title) : [];
+  } catch {
+    return [];
+  }
 }
 
 const GHOST_BUTTON =
@@ -72,10 +90,7 @@ function statusStyles(status?: string) {
 
 export default async function MyListingsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
-
-  if (!session) {
-    redirect("/login");
-  }
+  if (!session) redirect("/login"); 
 
   const listings = await getMyListings(session.user.email);
   const count = listings.length;
@@ -179,11 +194,7 @@ export default async function MyListingsPage() {
                       </td>
 
                       <td className="px-5 py-3 text-[13px] text-muted-foreground">
-                        {listing.rating ? (
-                          listing.rating
-                        ) : (
-                          <span className="text-muted-foreground">New</span>
-                        )}
+                        {listing.rating ? listing.rating : <span>New</span>}
                       </td>
 
                       <td className="px-5 py-3">

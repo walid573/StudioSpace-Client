@@ -5,8 +5,12 @@ import { headers } from 'next/headers'
 
 
 export async function proxy(request: NextRequest) {
-  // The About page is public marketing content, unlike the studio routes below.
-  if (request.nextUrl.pathname === "/studios/about-us") {
+  // Public browsing should remain available without auth; only management flows are protected.
+  if (
+    request.nextUrl.pathname === "/studios/about-us" ||
+    request.nextUrl.pathname === "/studios" ||
+    request.nextUrl.pathname.startsWith("/studios/")
+  ) {
     return NextResponse.next()
   }
 
@@ -17,10 +21,12 @@ export async function proxy(request: NextRequest) {
   if (!user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
+
+  return NextResponse.next()
 }
 
 
 
 export const config = {
-  matcher: ['/add-studio','/studios/:path','/my-listings','/my-bookings','/profile'],
+  matcher: ['/add-studio','/my-listings','/my-bookings','/profile'],
 }

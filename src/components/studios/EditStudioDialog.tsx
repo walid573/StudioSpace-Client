@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/toast";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -146,11 +147,14 @@ export default function EditStudioDialog({
     const imageUrl = form.imageUrl.trim();
 
     setSaving(true);
-
+    const token = await getTokenFromClient()
     try {
+      
       const response = await fetch(`${API_URL}/studios/${studio._id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+          authorization: `Bearer ${token}`
+         },
         body: JSON.stringify({
           title,
           category: form.category,

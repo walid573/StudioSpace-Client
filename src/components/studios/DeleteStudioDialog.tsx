@@ -16,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/components/ui/toast";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -45,8 +46,12 @@ export default function DeleteStudioDialog({
     setDeleting(true);
 
     try {
+      const token = await getTokenFromClient()
       const response = await fetch(`${API_URL}/studios/${studioId}`, {
         method: "DELETE",
+        headers:{
+          // authorization: `Bearer ${token}`
+        }
       });
 
       if (!response.ok) {

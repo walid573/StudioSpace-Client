@@ -1,27 +1,16 @@
-
 import { Suspense } from "react";
+import { connection } from "next/server";
 import ExploreStudio, {
     ExploreStudioSkeleton,
     type Studio,
 } from "@/components/studios/ExploreStudio";
 import { toDisplayImage } from "@/lib/images";
 
-export const metadata = {
-    title: "Explore Studios | StudioSpace",
-    description:
-        "Browse photo studios, film stages, podcast rooms and music suites by category and location.",
-};
-
-const API_URL = process.env.API_URL ?? "http://localhost:8000";
-
-
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 async function getStudios(): Promise<Studio[]> {
     try {
-        const res = await fetch(`${API_URL}/studios`, {
-           cache:'no-cache'
-        });
+        const res = await fetch(`${API_URL}/studios`, { cache: "no-store" });
 
         if (!res.ok) {
             console.error("Failed to fetch studios:", res.status);
@@ -31,15 +20,10 @@ async function getStudios(): Promise<Studio[]> {
         const studios: Studio[] = await res.json();
 
         return studios
-            .filter(
-                (studio) =>
-                    Boolean(studio.title && studio.category)
-            )
+            .filter((studio) => Boolean(studio.title && studio.category))
             .map((studio) => ({
                 ...studio,
-                imageUrl: studio.imageUrl
-                    ? toDisplayImage(studio.imageUrl)
-                    : "",
+                imageUrl: studio.imageUrl ? toDisplayImage(studio.imageUrl) : "",
             }));
     } catch (error) {
         console.error("Error fetching studios:", error);
@@ -48,8 +32,8 @@ async function getStudios(): Promise<Studio[]> {
 }
 
 async function StudioList() {
+    await connection(); // opt into request-time rendering before any fetch
     const studios = await getStudios();
-
     return <ExploreStudio studios={studios} />;
 }
 

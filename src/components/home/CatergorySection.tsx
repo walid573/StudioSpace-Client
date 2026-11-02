@@ -7,7 +7,7 @@ import {
     Palette,
     Podcast,
 } from "lucide-react";
-
+import { connection } from "next/server";
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 type StudioSummary = { category?: string; hourlyRate?: number | string };
@@ -90,7 +90,10 @@ function getStats(studios: StudioSummary[], category: string) {
     };
 }
 
+
+
 const CatergorySection = async () => {
+    await connection();
     const studios = await getStudios();
 
     return (

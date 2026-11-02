@@ -74,7 +74,7 @@ const menuItemClass =
 const Navbar = () => {
     const pathname = usePathname();
     const router = useRouter();
-
+    const [mobileOpen, setMobileOpen] = useState(false);
     const [bookings, setBookings] = useState<Booking[]>([]);
 
     const { data: session, isPending } = authClient.useSession();
@@ -109,7 +109,7 @@ const Navbar = () => {
                 `${API_URL}/my-bookings/${encodeURIComponent(email)}`,
                 {
                     cache: "no-store",
-                    
+                    credentials: "include",
                     headers,
                 }
             );
@@ -120,9 +120,9 @@ const Navbar = () => {
             }
 
             const data = await res.json();
-            
 
-console.log("My bookings:", data);
+
+            console.log("My bookings:", data);
 
 
             setBookings(Array.isArray(data) ? data : []);
@@ -151,7 +151,7 @@ console.log("My bookings:", data);
         <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-xl">
             <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
 
-               
+
                 <Link
                     href="/"
                     className="flex shrink-0 items-center gap-2"
@@ -169,35 +169,34 @@ console.log("My bookings:", data);
                     </span>
                 </Link>
 
-              
+
                 <div className="hidden items-center gap-1 md:flex">
                     {navLinks.map((link) => (
                         <Link
                             key={link.name}
                             href={link.href}
-                            className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${
-                                isActive(link.href)
+                            className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${isActive(link.href)
                                     ? "bg-primary/10 text-primary"
                                     : "text-foreground/75 hover:bg-accent hover:text-foreground"
-                            }`}
+                                }`}
                         >
                             {link.name}
                         </Link>
                     ))}
                 </div>
 
-             
+
                 <div className="flex shrink-0 items-center gap-2">
 
-                   
+
                     <ThemeToggle />
 
-                   
+
                     {isPending ? (
                         <div className="size-9 animate-pulse rounded-full bg-muted" />
                     ) : user ? (
 
-                        
+
                         <Popover
                             onOpenChange={(open) => {
                                 if (open) loadBookings();
@@ -225,7 +224,7 @@ console.log("My bookings:", data);
                                 sideOffset={10}
                                 className="w-[290px] gap-0 rounded-xl p-0"
                             >
-                               
+
                                 <PopoverHeader className="px-4 py-4">
                                     <div className="flex items-center gap-3">
                                         <Avatar className="size-10">
@@ -254,7 +253,7 @@ console.log("My bookings:", data);
 
                                 <div className="h-px bg-border" />
 
-                                
+
                                 <div className="p-2">
                                     {accountLinks.map((item) => {
                                         const Icon = item.icon;
@@ -281,7 +280,7 @@ console.log("My bookings:", data);
 
                                 <div className="mx-3 h-px bg-border" />
 
-                               
+
                                 <div className="p-2">
                                     <button
                                         type="button"
@@ -297,8 +296,8 @@ console.log("My bookings:", data);
 
                     ) : (
 
-                        
-                        
+
+
                         <div className="flex items-center gap-2">
                             <Link
                                 href="/login"
@@ -316,31 +315,27 @@ console.log("My bookings:", data);
                         </div>
                     )}
 
-                    
-                    <Sheet>
-                        <SheetTrigger asChild>
-                            <button
-                                type="button"
-                                aria-label="Open navigation menu"
-                                className="inline-flex size-9 items-center justify-center rounded-lg border border-border bg-background transition-colors hover:bg-accent md:hidden"
-                            >
-                                <Menu className="size-5" />
-                            </button>
+
+                    <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+                        <SheetTrigger
+                            aria-label="Open navigation menu"
+                            className="inline-flex size-9 items-center justify-center rounded-lg border border-border bg-background transition-colors hover:bg-accent md:hidden"
+                        >
+                            <Menu className="size-5" />
                         </SheetTrigger>
 
                         <SheetContent
                             side="right"
-                            className="w-[280px] border-l border-border bg-background p-0 sm:w-[320px]"
+                            className="flex w-[280px] flex-col gap-0 border-l border-border bg-background p-0 sm:w-[320px]"
                         >
-                         
-                         
-                            <SheetHeader className="border-b border-border px-5 py-6 text-left">
+                            <SheetHeader className="border-b border-border px-5 py-6 pr-12 text-left">
                                 <SheetTitle className="flex items-center gap-2 text-xl font-bold">
                                     <Image
                                         src="/logo.png"
                                         alt="StudioSpace logo"
                                         width={30}
                                         height={30}
+                                        className="shrink-0"
                                     />
                                     StudioSpace
                                 </SheetTitle>
@@ -350,30 +345,35 @@ console.log("My bookings:", data);
                                 </SheetDescription>
                             </SheetHeader>
 
-                            
-                            <nav className="flex flex-col gap-2 px-4 py-6">
+                            <nav
+                                aria-label="Mobile navigation"
+                                className="flex flex-1 flex-col gap-2 overflow-y-auto px-4 py-6"
+                            >
                                 <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                                     Navigation
                                 </p>
 
-                                {navLinks.map((link) => (
-                                    <SheetClose asChild key={link.name}>
+                                {navLinks.map((link) => {
+                                    const active = isActive(link.href);
+
+                                    return (
                                         <Link
+                                            key={link.name}
                                             href={link.href}
-                                            className={`flex items-center rounded-xl px-4 py-3 text-sm font-semibold transition-all ${
-                                                isActive(link.href)
+                                            onClick={() => setMobileOpen(false)}
+                                            aria-current={active ? "page" : undefined}
+                                            className={`flex items-center rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${active
                                                     ? "bg-primary/10 text-primary"
                                                     : "text-foreground hover:bg-accent"
-                                            }`}
+                                                }`}
                                         >
                                             {link.name}
-
-                                            {isActive(link.href) && (
+                                            {active && (
                                                 <span className="ml-auto size-1.5 rounded-full bg-primary" />
                                             )}
                                         </Link>
-                                    </SheetClose>
-                                ))}
+                                    );
+                                })}
                             </nav>
                         </SheetContent>
                     </Sheet>

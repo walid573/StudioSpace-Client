@@ -7,9 +7,25 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { getTokenFromClient } from "@/lib/getTokenFromClient";
-import EditBooking, { Booking, Studio } from "@/components/studios/EditBookings";
+
 import DeleteBooking from "@/components/studios/DeleteBookings";
 
+export type Booking = {
+  _id: string;
+  studioId: string;
+  date: string;
+  start: string;
+  end: string;
+  hours: number;
+  total: number;
+  status: "pending" | "confirmed" | "declined";
+};
+
+export type Studio = {
+  _id: string;
+  title?: string;
+  imageUrl?: string;
+};
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -113,9 +129,7 @@ export default function MyBookingsPage() {
   }
 
  
-  function handleUpdated(updated: Booking) {
-    setBookings((current) => current.map((b) => (b._id === updated._id ? updated : b)));
-  }
+ 
 
   if (isPending || loading) return <BookingsSkeleton />;
 
@@ -227,9 +241,7 @@ export default function MyBookingsPage() {
                     {meta.label}
                   </span>
 
-                  {status === "pending" && (
-                    <EditBooking booking={booking} studioTitle={studio?.title}  onUpdated={handleUpdated} />
-                  )}
+                  
 
                   {(status === "pending" || status === "cancelled") && (
                     <DeleteBooking bookingId={booking._id}

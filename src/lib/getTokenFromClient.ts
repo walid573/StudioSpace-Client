@@ -18,7 +18,7 @@ export const getTokenFromClient = async (): Promise<string | null> => {
 
       const payload = result as any;
       const token = payload?.data?.token ?? payload?.token ?? null;
-      if (typeof token === "string" && token.trim()) return token;
+      if (typeof token === "string" && token.trim()) return token.trim();
     } catch {
       // Fallback below avoids depending on a specific Better Auth proxy shape.
     }
@@ -26,19 +26,40 @@ export const getTokenFromClient = async (): Promise<string | null> => {
 
   if (typeof window === "undefined") return null;
 
+  const urls = [
+    `${window.location.origin}/api/auth/token`,
+    `${window.location.origin}/api/auth/get-token`,
+  ];
+
+  for (const url of urls) {
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+        headers: { Accept: "application/json" },
+      });
+
+      if (!response.ok) continue;
+
+      const data = (await response.json()) as { token?: string | null } | null;
+      const token = data?.token ?? null;
+      if (typeof token === "string" && token.trim()) return token.trim();
+    } catch {
+      // Try the next Better Auth token endpoint if the route is unavailable.
+    }
+  }
+
   try {
-    const response = await fetch(`${window.location.origin}/api/auth/token`, {
+    const sessionResponse = await fetch(`${window.location.origin}/api/auth/get-session`, {
       method: "GET",
       credentials: "include",
       headers: { Accept: "application/json" },
     });
 
-    if (!response.ok) return null;
-    const data = (await response.json()) as { token?: string | null } | null;
-    const token = data?.token ?? null;
-    if (typeof token === "string" && token.trim()) return token;
+    const jwtHeader = sessionResponse.headers.get("set-auth-jwt");
+    if (jwtHeader && jwtHeader.trim()) return jwtHeader.trim();
   } catch {
-    // No usable token for the current session.
+    // Session token is not exposed via the header in this environment.
   }
 
   return null;

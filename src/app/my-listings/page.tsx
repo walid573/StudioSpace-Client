@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- listing photos come from the database and can point at any host, so next/image cannot optimise them. */
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -9,7 +10,7 @@ import DeleteStudioDialog from "@/components/studios/DeleteStudioDialog";
 import EditStudioDialog from "@/components/studios/EditStudioDialog";
 import { getTokenFromServer } from "@/lib/getTokenFromSever";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const instant = false;
 
@@ -35,9 +36,8 @@ type Listing = {
 };
 
 async function getMyListings(email: string): Promise<Listing[]> {
- 
-  const token = await getTokenFromServer()
-   
+  const token = await getTokenFromServer();
+
   const fetchOptions: RequestInit = {
     next: { revalidate: 30 },
     credentials: "include",
@@ -45,7 +45,7 @@ async function getMyListings(email: string): Promise<Listing[]> {
 
   if (token) {
     fetchOptions.headers = {
-            Authorization: "Bearer " + token,
+      Authorization: "Bearer " + token,
       "Content-Type": "application/json",
     };
   }
@@ -88,9 +88,17 @@ function statusStyles(status?: string) {
   return "border-border/40 bg-accent text-muted-foreground";
 }
 
-export default async function MyListingsPage() {
+export default function MyListingsPage() {
+  return (
+    <Suspense fallback={<ListingsSkeleton />}>
+      <MyListingsContent />
+    </Suspense>
+  );
+}
+
+async function MyListingsContent() {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) redirect("/login"); 
+  if (!session) redirect("/login");
 
   const listings = await getMyListings(session.user.email);
   const count = listings.length;
@@ -158,7 +166,7 @@ export default async function MyListingsPage() {
                   const place =
                     [listing.location?.area, listing.location?.city].filter(Boolean).join(", ") ||
                     "—";
-                 
+
                   const thumbnail = listing.imageUrl?.trim() || undefined;
 
                   return (
@@ -229,6 +237,70 @@ export default async function MyListingsPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function ListingsSkeleton() {
+  return (
+    <div className="mx-auto min-h-[65vh] max-w-5xl px-4 py-10 sm:px-6">
+  
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="h-8 w-56 animate-pulse rounded-md bg-muted" />
+          <div className="mt-3 h-4 w-72 animate-pulse rounded-md bg-muted/50" />
+        </div>
+        <div className="h-9 w-36 shrink-0 animate-pulse rounded-full bg-muted" />
+      </div>
+
+  
+      <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card">
+        <div className="overflow-x-auto">
+          <div className="min-w-[760px]">
+      
+            <div className="flex items-center border-b border-border px-5 py-3">
+              <div className="h-3 w-16 animate-pulse rounded bg-muted/50" />
+              <div className="ml-auto flex items-center gap-[60px]">
+                <div className="h-3 w-14 animate-pulse rounded bg-muted/50" />
+                <div className="h-3 w-10 animate-pulse rounded bg-muted/50" />
+                <div className="h-3 w-10 animate-pulse rounded bg-muted/50" />
+                <div className="h-3 w-12 animate-pulse rounded bg-muted/50" />
+                <div className="h-3 w-14 animate-pulse rounded bg-muted/50" />
+              </div>
+            </div>
+
+          
+            <div className="divide-y divide-border">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex items-center px-5 py-3">
+                 
+                  <div className="flex flex-1 items-center gap-3">
+                    <div className="size-10 shrink-0 animate-pulse rounded-lg bg-muted/50" />
+                    <div className="space-y-2">
+                      <div className="h-4 w-40 animate-pulse rounded bg-muted" />
+                      <div className="h-3 w-24 animate-pulse rounded bg-muted/50" />
+                    </div>
+                  </div>
+
+            
+                  <div className="h-4 w-[110px] animate-pulse rounded bg-muted/50" />
+                  <div className="ml-10 h-4 w-14 animate-pulse rounded bg-muted/50" />
+                  <div className="ml-10 h-4 w-8 animate-pulse rounded bg-muted/50" />
+
+               
+                  <div className="ml-10 h-6 w-[70px] animate-pulse rounded-full bg-muted" />
+
+               
+                  <div className="ml-10 flex w-[170px] justify-end gap-2">
+                    <div className="h-8 w-20 animate-pulse rounded-full bg-muted/50" />
+                    <div className="h-8 w-20 animate-pulse rounded-full bg-muted/50" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

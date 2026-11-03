@@ -199,7 +199,7 @@ const StudioForm = () => {
       timeout: 5000,
     });
 
-      router.push("/studios");
+      router.push("/my-listings");
       router.refresh();
     } catch {
       setError("Could not reach the server. Is it running on port 8000?");

@@ -46,12 +46,31 @@ import { getTokenFromClient } from "@/lib/getTokenFromClient";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const API_URL =
-    process.env.NEXT_PUBLIC_API_URL ;
+    process.env.NEXT_PUBLIC_API_URL;
 
 type Booking = {
     _id: string;
     status: string;
 };
+
+function LogoMark({ size = 28 }: { size?: number }) {
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 2l4 7M22 12h-8M17 20l-4-7M7 20l2-8M2 12l8-1M7 4l5 8" />
+        </svg>
+    );
+}
 
 const navLinks = [
     { name: "Home", href: "/" },
@@ -155,28 +174,29 @@ const Navbar = () => {
                     href="/"
                     className="flex shrink-0 items-center gap-2"
                 >
-                    <Image
+                    {/* <Image
                         src="/logo.png"
                         alt="StudioSpace logo"
                         width={32}
                         height={32}
                         priority
-                    />
-
+                    /> */}
+                    <LogoMark />
                     <span className="whitespace-nowrap text-lg font-bold tracking-tight sm:text-xl">
                         StudioSpace
                     </span>
                 </Link>
 
 
-                <div className="hidden items-center gap-1 md:flex">
+                <div className="hidden items-center gap-4 md:flex">
                     {navLinks.map((link) => (
                         <Link
                             key={link.name}
                             href={link.href}
-                            className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${isActive(link.href)
-                                    ? "bg-primary/10 text-primary"
-                                    : "text-foreground/75 hover:bg-accent hover:text-foreground"
+                            aria-current={isActive(link.href) ? "page" : undefined}
+                            className={`flex items-center border-b-2 px-2 py-2 text-[15px] font-medium transition-colors ${isActive(link.href)
+                                    ? "border-black text-black dark:border-white dark:text-white"
+                                    : "border-transparent text-neutral-500 hover:text-black dark:text-[#A1A1A1] dark:hover:text-white"
                                 }`}
                         >
                             {link.name}
@@ -362,8 +382,8 @@ const Navbar = () => {
                                             onClick={() => setMobileOpen(false)}
                                             aria-current={active ? "page" : undefined}
                                             className={`flex items-center rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${active
-                                                    ? "bg-primary/10 text-primary"
-                                                    : "text-foreground hover:bg-accent"
+                                                ? "bg-primary/10 text-primary"
+                                                : "text-foreground hover:bg-accent"
                                                 }`}
                                         >
                                             {link.name}

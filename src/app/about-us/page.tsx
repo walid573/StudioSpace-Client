@@ -39,7 +39,7 @@ const PRIMARY_BUTTON =
   "inline-flex h-9 items-center rounded-full bg-primary px-4 text-[12px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 const SECONDARY_BUTTON =
-  "inline-flex h-9 items-center rounded-full border border-border bg-background px-4 text-[12px] font-medium text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
+  "inline-flex h-10  items-center rounded-full border bg-background px-4 text-[12px] font-medium text-foreground transition-all duration-200 hover:bg-accent focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 
 export default function AboutUsPage() {

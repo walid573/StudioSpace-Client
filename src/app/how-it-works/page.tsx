@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Check, ChevronDown, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "How it works — StudioSpace",
@@ -23,12 +24,13 @@ const HOST_STEPS = [
     body: "Review requests, confirm bookings and track everything from your dashboard.",
   },
 ];
-
 const PRIMARY_BUTTON =
-  "inline-flex h-9 items-center rounded-full bg-primary px-4 text-[12px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
+  "inline-flex h-9 items-center rounded-full bg-foreground px-4 text-[12px] font-medium text-background transition-all duration-200 hover:bg-foreground/90 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 const SECONDARY_BUTTON =
-  "inline-flex h-9 items-center rounded-full border border-border bg-background px-4 text-[12px] font-medium text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
+  "inline-flex h-10  items-center rounded-full border bg-background px-4 text-[12px] font-medium text-foreground transition-all duration-200 hover:bg-accent focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
+
+
 
 const STEPS = [
   {
@@ -67,10 +69,9 @@ const STEPS = [
 
 function StepLabel({ index }: { index: number }) {
   return (
-    <p className="text-[10px] font-semibold tracking-[0.18em] text-blue-500 uppercase">
-      Step {String(index + 1).padStart(2, "0")}
-      <span className="ml-1 text-neutral-600">/ 04</span>
-    </p>
+    <span className="inline-flex items-center rounded-full bg-transparent px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider border border-gray-400/20">
+      Step {String(index + 1).padStart(2, "0")} / 04
+    </span>
   );
 }
 
@@ -80,18 +81,18 @@ function StepText({ index }: { index: number }) {
   return (
     <div>
       <StepLabel index={index} />
-      <h2 className="mt-2 text-[19px] font-bold tracking-[-0.01em] text-foreground sm:text-2xl">
+      <h2 className="mt-2 text-[19px] font-bold tracking-tight text-foreground sm:text-2xl">
         {step.title}
       </h2>
       <ul className="mt-3 space-y-2">
         {step.points.map((point) => (
           <li
             key={point}
-            className="flex gap-2 text-[12.5px] leading-relaxed text-muted-foreground"
+            className="flex gap-2 text-sm leading-relaxed text-muted-foreground"
           >
             <span
               aria-hidden="true"
-              className="mt-[7px] size-1 shrink-0 rounded-full bg-muted-foreground"
+              className="mt-1 size-1.5 shrink-0 rounded-full bg-muted-foreground"
             />
             <span>{point}</span>
           </li>
@@ -166,9 +167,9 @@ function ExplorePanel() {
         {studios.map((studio, index) => (
           <div
             key={studio.title}
-            className="overflow-hidden rounded-lg border border-border bg-muted/40"
+            className="overflow-hidden rounded-lg border border-blue-400/20 bg-muted/40"
           >
-            <div className={`h-14 bg-gradient-to-br sm:h-16 ${STUDIO_GRADIENTS[index]}`} />
+            <div className={`h-14 bg-gradient-to-br sm:h-16 ${STUDIO_GRADIENTS[index]} shadow-lg shadow-blue-500/20`} />
 
             <div className="p-2">
               <span className="inline-flex rounded-full bg-muted px-1.5 py-0.5 text-[7.5px] font-medium text-foreground">
@@ -267,7 +268,7 @@ function HoursPanel() {
         <BookingField label="Hours" value="10:00 to 14:00" open />
       </div>
 
-      {/* The same Start / End popover the real booking form opens. */}
+      
       <div className="mt-2 rounded-lg border border-border bg-muted/40 p-2.5 shadow-sm">
         <div className="grid grid-cols-2 gap-2">
           <div>
@@ -352,16 +353,16 @@ export default function HowItWorksPage() {
     <div className="bg-background text-foreground">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="pt-8 lg:pt-10">
-          <p className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase">
+          <p className="text-xs font-medium tracking-wider uppercase text-muted-foreground">
             How it works
           </p>
         </div>
 
         <header className="mx-auto max-w-3xl pt-6 pb-10 text-center lg:pt-7 lg:pb-12">
-          <h1 className="text-[28px] leading-[1.1] font-bold tracking-[-0.03em] text-foreground sm:text-[34px] lg:text-[40px]">
+          <h1 className="text-[28px] leading-tight font-bold tracking-tight text-foreground sm:text-[34px] lg:text-[40px]">
             Book a creative space in four simple steps
           </h1>
-          <p className="mx-auto mt-3 max-w-lg text-[13px] leading-relaxed text-muted-foreground sm:text-[14px]">
+          <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
             From the first search to the final take, StudioSpace keeps booking clear, fast and
             fair for creators and hosts.
           </p>
@@ -384,7 +385,7 @@ export default function HowItWorksPage() {
             return (
               <section
                 key={step.title}
-                className="grid items-center gap-6 border-t border-border py-11 lg:grid-cols-2 lg:gap-14 lg:py-14"
+                className="grid items-center gap-8 border-t border-border py-12 lg:grid-cols-2 lg:gap-14 lg:py-16"
               >
                 <div className={visualFirst ? "lg:order-2" : ""}>
                   <StepText index={index} />
@@ -403,20 +404,20 @@ export default function HowItWorksPage() {
             For hosts
           </span>
 
-          <h2 className="mt-4 max-w-xl text-[24px] leading-[1.15] font-bold tracking-[-0.02em] text-foreground sm:text-[28px]">
+          <h2 className="mt-4 max-w-xl text-[24px] leading-tight font-bold tracking-tight text-foreground sm:text-[28px]">
             Hosting works the same way, in reverse
           </h2>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-3 sm:gap-0">
+          <div className="mt-10 grid gap-6 sm:grid-cols-3">
             {HOST_STEPS.map((step, index) => (
               <div
                 key={step.title}
-                className={index === 0 ? "sm:pr-6" : "sm:border-l sm:border-border sm:px-6"}
+                className={index === 0 ? "sm:pr-6" : index === HOST_STEPS.length - 1 ? "sm:pl-6" : "sm:border-l sm:border-border sm:px-6"}
               >
-                <p className="text-[10px] font-semibold text-blue-500">
+                <p className="text-[10px] font-semibold text-blue-600">
                   {String(index + 1).padStart(2, "0")}
                 </p>
-                <h3 className="mt-1.5 text-[14px] font-semibold tracking-[-0.01em] text-foreground">
+                <h3 className="mt-1.5 text-[14px] font-semibold tracking-tight text-foreground">
                   {step.title}
                 </h3>
                 <p className="mt-1.5 text-[12px] leading-relaxed text-muted-foreground">{step.body}</p>
@@ -427,10 +428,10 @@ export default function HowItWorksPage() {
 
         <section className="pt-2 pb-16 lg:pb-20">
           <div className="relative mx-auto max-w-5xl overflow-hidden rounded-2xl border border-border bg-card bg-[radial-gradient(120%_140%_at_25%_0%,rgba(37,99,235,0.28),transparent_55%)] px-6 py-10 text-center sm:py-12">
-            <h2 className="text-[22px] font-bold tracking-[-0.02em] text-foreground sm:text-[26px]">
+            <h2 className="text-[22px] font-bold tracking-tight text-foreground sm:text-[26px]">
               Ready to book your first space?
             </h2>
-            <p className="mx-auto mt-2 max-w-sm text-[12.5px] leading-relaxed text-muted-foreground">
+            <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
               Browse studios near you and reserve your hours today.
             </p>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">

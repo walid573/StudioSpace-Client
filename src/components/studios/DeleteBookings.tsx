@@ -22,7 +22,7 @@ import { authClient } from "@/lib/auth-client";
 import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_URL;
 
 const DEFAULT_TRIGGER =
   "inline-flex h-8 items-center gap-1.5 rounded-full border border-red-500/30 px-3 text-[12px] text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-50";

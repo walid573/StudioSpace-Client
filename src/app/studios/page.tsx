@@ -6,11 +6,11 @@ import ExploreStudio, {
 } from "@/components/studios/ExploreStudio";
 import { toDisplayImage } from "@/lib/images";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 async function getStudios(): Promise<Studio[]> {
     try {
-        const res = await fetch(`${API_URL}/studios`, { cache: "no-store" });
+        const res = await fetch(`${API_URL}/studios`, { cache: 'no-cache' });
 
         if (!res.ok) {
             console.error("Failed to fetch studios:", res.status);

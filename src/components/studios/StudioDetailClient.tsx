@@ -22,7 +22,7 @@ import { isImageSource } from "@/lib/images";
 import DeleteStudioDialog from "@/components/studios/DeleteStudioDialog";
 import EditStudioDialog, { type EditableStudio } from "@/components/studios/EditStudioDialog";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
 export type Studio = {
   _id: string;

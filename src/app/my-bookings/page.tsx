@@ -27,7 +27,7 @@ export type Studio = {
   imageUrl?: string;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
 

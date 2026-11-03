@@ -18,7 +18,7 @@ import {
 import { toast } from "@/components/ui/toast";
 import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
 type DeleteStudioDialogProps = {
   studioId: string;

@@ -21,29 +21,33 @@ export type Studio = {
   status: string;
 };
 
-const API_URL = process.env.API_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 
 async function getFeaturedStudios(): Promise<Studio[]> {
-  const res = await fetch(`${API_URL}/featured`, {
-    next: { revalidate: 60 },
-  });
+  try {
+    const res = await fetch(`${API_URL}/featured`, {
+      next: { revalidate: 60 },
+    });
 
-  if (!res.ok) {
+    if (!res.ok) {
+      return [];
+    }
+
+    const studios: Studio[] = await res.json();
+
+    return studios
+      .filter((studio) => Boolean(studio.title) && studio.status !== "pending")
+      .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+      .slice(0, 6)
+      .map((studio) => ({
+        ...studio,
+        imageUrl: toDisplayImage(studio.imageUrl),
+      }));
+  } catch (error) {
+    console.error("Failed to fetch featured studios:", error);
     return [];
   }
-
-  const studios: Studio[] = await res.json();
-
-  return studios
-   
-    .filter((studio) => Boolean(studio.title) && studio.status !== "pending")
-    .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
-    .slice(0, 6)
-    .map((studio) => ({
-      ...studio,
-      imageUrl: toDisplayImage(studio.imageUrl),
-    }));
 }
 
 export function StudioCard({ studio }: { studio: Studio }) {

@@ -9,7 +9,7 @@ import { authClient } from "@/lib/auth-client";
 import { isImageSource } from "@/lib/images";
 import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
 const CATEGORIES = ["Photo Studio", "Film Stage", "Podcast Lounge", "Music Suite", "Workshop"];
 

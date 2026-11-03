@@ -9,7 +9,7 @@ import DeleteStudioDialog from "@/components/studios/DeleteStudioDialog";
 import EditStudioDialog from "@/components/studios/EditStudioDialog";
 import { getTokenFromServer } from "@/lib/getTokenFromSever";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
 export const instant = false;
 

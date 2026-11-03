@@ -46,7 +46,7 @@ import { getTokenFromClient } from "@/lib/getTokenFromClient";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const API_URL =
-    process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+    process.env.NEXT_PUBLIC_API_URL ;
 
 type Booking = {
     _id: string;

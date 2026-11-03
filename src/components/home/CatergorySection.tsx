@@ -8,7 +8,7 @@ import {
     Podcast,
 } from "lucide-react";
 import { connection } from "next/server";
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
 type StudioSummary = { category?: string; hourlyRate?: number | string };
 
@@ -66,8 +66,8 @@ const categoryHref = (category: string) =>
 
 async function getStudios(): Promise<StudioSummary[]> {
     try {
-        const response = await fetch(`${API_URL}/studios`, {
-            cache:'no-cache',
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/studios`, {
+             cache: "no-store",
         });
         if (!response.ok) return [];
         const data = await response.json();

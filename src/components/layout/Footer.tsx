@@ -9,6 +9,25 @@ const categories = [
     { name: "Art Workshops", href: "/studios?category=art-workshops" },
 ];
 
+function LogoMark({ size = 28 }: { size?: number }) {
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 2l4 7M22 12h-8M17 20l-4-7M7 20l2-8M2 12l8-1M7 4l5 8" />
+        </svg>
+    );
+}
+
 const socials = [
     {
         name: "X",
@@ -43,7 +62,8 @@ const Footer = () => {
             <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-12 sm:px-6 md:flex-row md:items-start md:justify-between lg:px-8 lg:py-14">
                 <div className="max-w-sm">
                     <Link href="/" className="flex w-fit items-center gap-2">
-                        <Image src="/logo.png" alt="StudioSpace" width={28} height={28} />
+                        {/* <Image src="/logo.png" alt="StudioSpace" width={28} height={28} /> */}
+                        <LogoMark/>
                         <span className="text-xl font-semibold tracking-[-0.01em] whitespace-nowrap">StudioSpace</span>
                     </Link>
                     <p className="mt-4 text-[13px] leading-relaxed text-muted-foreground/60">

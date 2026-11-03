@@ -60,7 +60,7 @@ async function getBookings(email: string): Promise<Booking[]> {
 
     const payload = await response.json();
     const bookings = Array.isArray(payload) ? payload : Array.isArray(payload?.bookings) ? payload.bookings : [];
-    return bookings.filter((booking) => booking && typeof booking === "object");
+    return bookings.filter((booking:Booking) => booking && typeof booking === "object");
   } catch {
     return [];
   }

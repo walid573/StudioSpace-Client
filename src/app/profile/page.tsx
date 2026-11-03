@@ -5,9 +5,10 @@ import { headers } from "next/headers";
 import { format } from "date-fns";
 
 import { auth } from "@/lib/auth";
+import { getTokenFromServer } from "@/lib/getTokenFromSever";
 import EditProfileDialog from "@/components/profile/EditProfileDialog";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export const instant = false;
 
@@ -29,13 +30,27 @@ const BUTTON =
 const BADGE =
   "rounded-full border border-border bg-muted/70 px-2.5 py-1 text-[11px] font-medium text-foreground";
 
-async function getArray<T>(url: string): Promise<T[]> {
+async function getArray<T>(url: string, authToken?: string): Promise<T[]> {
   try {
-    const res = await fetch(url, {
+    const options: RequestInit = {
       next: { revalidate: 60 },
-    });
+      credentials: "include",
+    };
+
+    if (authToken) {
+      options.headers = {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      };
+    }
+
+    const res = await fetch(url, options);
     const data = res.ok ? await res.json() : [];
-    return Array.isArray(data) ? data : [];
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === "object" && Array.isArray((data as { bookings?: T[] }).bookings)) {
+      return (data as { bookings: T[] }).bookings;
+    }
+    return [];
   } catch {
     return [];
   }
@@ -45,13 +60,17 @@ export default async function ProfilePage() {
   const requestHeaders = await headers();
   const session = await auth.api.getSession({ headers: requestHeaders });
 
+  if (!session) {
+    return null;
+  }
 
-  const { user } = session!;
+  const { user } = session;
   const email = user.email;
+  const authToken = await getTokenFromServer();
 
   const [studios, bookings, accounts] = await Promise.all([
     getArray<Studio>(`${API_URL}/studios`),
-    getArray<unknown>(`${API_URL}/my-bookings/${encodeURIComponent(email)}`),
+    getArray<unknown>(`${API_URL}/my-bookings/${encodeURIComponent(email)}`, authToken || undefined),
     auth.api.listUserAccounts({ headers: requestHeaders }).catch(() => []),
   ]);
 

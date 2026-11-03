@@ -4,9 +4,9 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
+import { getTokenFromServer } from "@/lib/getTokenFromSever";
 
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 
 export const instant = false;
@@ -41,11 +41,29 @@ async function getStudios(): Promise<Studio[]> {
 
 
 async function getBookings(email: string): Promise<Booking[]> {
-  const response = await fetch(`${API_URL}/my-bookings/${encodeURIComponent(email)}`, {
+  const token = await getTokenFromServer();
+  const fetchOptions: RequestInit = {
     next: { revalidate: 30 },
-  });
-  if (!response.ok) return [];
-  return response.json();
+    credentials: "include",
+  };
+
+  if (token) {
+    fetchOptions.headers = {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/my-bookings/${encodeURIComponent(email)}`, fetchOptions);
+    if (!response.ok) return [];
+
+    const payload = await response.json();
+    const bookings = Array.isArray(payload) ? payload : Array.isArray(payload?.bookings) ? payload.bookings : [];
+    return bookings.filter((booking) => booking && typeof booking === "object");
+  } catch {
+    return [];
+  }
 }
 
 

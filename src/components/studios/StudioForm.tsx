@@ -8,8 +8,9 @@ import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { isImageSource } from "@/lib/images";
 import { getTokenFromClient } from "@/lib/getTokenFromClient";
+import { toast } from "../ui/toast";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const CATEGORIES = ["Photo Studio", "Film Stage", "Podcast Lounge", "Music Suite", "Workshop"];
 
@@ -141,7 +142,7 @@ const StudioForm = () => {
       address: form.address.trim(),
     };
 
-    
+
     const coverImage = isImageSource(form.imageUrl) ? form.imageUrl.trim() : "";
 
     const result = {
@@ -164,21 +165,39 @@ const StudioForm = () => {
     };
 
     setSubmitting(true);
+    const toastId = toast.add({
+      title: "Publishing studio...",
+      description: "Please wait while we save your listing.",
+      type: "loading",
+      timeout: 0, 
+    });
     const token = await getTokenFromClient()
-    
+
     try {
       const response = await fetch(`${API_URL}/studios`, {
         method: "POST",
-        headers: { "Content-Type": "application/json",
+        headers: {
+          "Content-Type": "application/json",
           authorization: `Bearer ${token}`
-         },
+        },
         body: JSON.stringify(result),
       });
 
-      if (!response.ok) {
-        setError(`Could not save the studio (error ${response.status}). Please try again.`);
-        return;
-      }
+       if (!response.ok) {
+      toast.update(toastId, {
+        title: "Couldn't add studio",
+        description: `Could not save the studio (error ${response.status}). Please try again.`,
+        type: "error",
+        timeout: 5000,
+      });
+      return;
+    }
+    toast.update(toastId, {
+      title: "Studio added",
+      description: `${form.title.trim()} is now listed.`,
+      type: "success",
+      timeout: 5000,
+    });
 
       router.push("/studios");
       router.refresh();

@@ -5,8 +5,14 @@ import ExploreStudio, {
     type Studio,
 } from "@/components/studios/ExploreStudio";
 import { toDisplayImage } from "@/lib/images";
-
+import type { Metadata } from "next";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+export const metadata: Metadata = {
+  title: "Explore Studios — StudioSpace",
+  description:
+    "Filter by category, price and location.",
+};
 
 async function getStudios(): Promise<Studio[]> {
     try {

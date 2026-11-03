@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import { signIn } from "@/lib/auth-client";
+import { toast } from "../ui/toast";
 
 const inputClass =
   "h-11 rounded-xl border-input bg-background px-3 text-[14px] text-foreground placeholder:text-muted-foreground transition-colors focus-visible:border-ring focus-visible:ring-ring/10";
@@ -52,13 +53,19 @@ export default function LoginForm({
           "We couldn't log you in. Check your email and password and try again.",
         ),
       );
+      
       setSubmitting(false);
       return;
     }
-
+    toast.add({ title: `Welcome back!`, type: "success" });
     router.replace(redirectTo);
     router.refresh();
   } catch {
+    toast.add({
+      title: "Something went wrong",
+      description: "Please try again.",
+      type: "error",
+    });
     setError("Something went wrong while logging in. Please try again.");
     setSubmitting(false);
   }

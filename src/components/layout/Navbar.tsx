@@ -44,6 +44,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { getTokenFromClient } from "@/lib/getTokenFromClient";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { toast } from "../ui/toast";
 
 const API_URL =
     process.env.NEXT_PUBLIC_API_URL;
@@ -156,12 +157,33 @@ const Navbar = () => {
 
     async function handleSignOut() {
         try {
-            await authClient.signOut();
+            const { error } = await authClient.signOut();
+
+            if (error) {
+                console.error("Logout failed:", error);
+                toast.add({
+                    title: "Logout failed",
+                    description: error.message ?? "We couldn't log you out. Please try again.",
+                    type: "error",
+                });
+                return;
+            }
+
             setBookings([]);
+            toast.add({
+                title: "Logged out",
+                description: "You've been signed out successfully.",
+                type: "success",
+            });
             router.replace("/");
             router.refresh();
         } catch (error) {
             console.error("Logout failed:", error);
+            toast.add({
+                title: "Something went wrong",
+                description: "Please try again.",
+                type: "error",
+            });
         }
     }
 
@@ -195,8 +217,8 @@ const Navbar = () => {
                             href={link.href}
                             aria-current={isActive(link.href) ? "page" : undefined}
                             className={`flex items-center border-b-2 px-2 py-2 text-[15px] font-medium transition-colors ${isActive(link.href)
-                                    ? "border-black text-black dark:border-white dark:text-white"
-                                    : "border-transparent text-neutral-500 hover:text-black dark:text-[#A1A1A1] dark:hover:text-white"
+                                ? "border-black text-black dark:border-white dark:text-white"
+                                : "border-transparent text-neutral-500 hover:text-black dark:text-[#A1A1A1] dark:hover:text-white"
                                 }`}
                         >
                             {link.name}

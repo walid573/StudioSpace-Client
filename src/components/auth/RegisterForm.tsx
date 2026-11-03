@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import { signUp, signIn } from "@/lib/auth-client";
+import { toast } from "../ui/toast";
 
 const inputClass =
   "h-11 rounded-xl border-input bg-background px-3 text-[14px] text-foreground placeholder:text-muted-foreground transition-colors focus-visible:border-ring focus-visible:ring-ring/10";
@@ -62,6 +63,7 @@ export default function RegisterForm() {
 
   if (!passwordValid) {
     setError("Choose a password that meets all the requirements.");
+    
     return;
   }
 
@@ -76,6 +78,7 @@ export default function RegisterForm() {
     });
 
     if (error) {
+      
       setError(
         getAuthErrorMessage(error, "We couldn't create your account. Please try again."),
       );
@@ -86,8 +89,12 @@ export default function RegisterForm() {
     setEmail("");
     setPhotoUrl("");
     setPassword("");
-
-    router.replace("/login?registered=1");
+     toast.add({
+      title: "Account created",
+      description: "Please log in to continue.",
+      type: "success",
+    });
+    router.replace("/");
   } catch {
     setError("Something went wrong. Please try again.");
   } finally {
@@ -103,14 +110,23 @@ export default function RegisterForm() {
         provider: "google",
         callbackURL: "/",
       });
-
+      
       if (socialError) {
+        toast.add({
+          title: "Google sign-up failed",
+          description: getAuthErrorMessage(socialError, "Please try again."),
+          type: "error",
+        });
         setError(
           getAuthErrorMessage(socialError, "Google sign-up failed. Please try again."),
         );
       }
     } catch {
-      setError("Google sign-up failed. Please try again.");
+      toast.add({
+        title: "Google sign-up failed",
+        description: "Please try again.",
+        type: "error",
+      });
     } finally {
       setGoogleLoading(false);
     }

@@ -114,25 +114,47 @@ export function StudioCard({ studio }: { studio: Studio }) {
 
 export function FeaturedStudiosSkeleton() {
   return (
-    <section className="bg-background text-foreground">
-      <div className="mx-auto max-w-7xl px-4 pt-2 pb-12 sm:px-6 lg:px-8 lg:pt-4 lg:pb-16">
-        <div className="h-8 w-56 animate-pulse rounded bg-muted" />
-        <div className="mt-3 h-4 w-64 animate-pulse rounded bg-muted/50" />
+    <section className="bg-background pt-8 text-foreground">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:pt-4 lg:pb-16">
+
+
+        <div className="animate-pulse">
+          <div className="h-8 w-56 rounded-md bg-muted" />
+          <div className="mt-3 h-4 w-64 max-w-full rounded-md bg-muted/60" />
+        </div>
+
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
-            <div
+            <article
               key={index}
-              className="rounded-xl border border-border bg-muted/50 p-2"
+              className="animate-pulse rounded-lg border border-border bg-muted/50 p-2"
             >
-              <div className="aspect-[5/3] animate-pulse rounded-lg bg-muted/50" />
-              <div className="px-3 pb-1 pt-4">
-                <div className="h-6 w-24 animate-pulse rounded-full bg-muted/50" />
-                <div className="mt-3 h-5 w-3/4 animate-pulse rounded bg-muted" />
-                <div className="mt-2 h-4 w-1/2 animate-pulse rounded bg-muted/50" />
-                <div className="mt-10 h-10 w-full animate-pulse rounded-full bg-muted" />
+
+              <div className="aspect-[5/3] overflow-hidden rounded-lg bg-muted" />
+
+              <div className="flex flex-col px-3 pb-1 pt-4">
+
+
+                <div className="h-6 w-24 rounded-full bg-muted" />
+
+
+                <div className="mt-3 h-5 w-3/4 rounded-md bg-muted" />
+
+
+                <div className="mt-2 h-4 w-1/2 rounded-md bg-muted/70" />
+
+
+                <div className="mt-auto flex items-center justify-between pt-4">
+                  <div className="h-6 w-24 rounded-md bg-muted" />
+                  <div className="h-4 w-16 rounded-md bg-muted/70" />
+                </div>
+
+
+                <div className="mt-4 h-10 w-full rounded-full bg-muted" />
+
               </div>
-            </div>
+            </article>
           ))}
         </div>
       </div>

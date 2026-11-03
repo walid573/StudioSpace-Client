@@ -109,7 +109,6 @@ const Navbar = () => {
                 `${API_URL}/my-bookings/${encodeURIComponent(email)}`,
                 {
                     cache: "no-store",
-                    credentials: "include",
                     headers,
                 }
             );

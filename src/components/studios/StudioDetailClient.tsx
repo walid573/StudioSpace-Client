@@ -377,7 +377,6 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
 
       const response = await fetch(`${API_URL}/my-bookings`, {
         method: "POST",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,

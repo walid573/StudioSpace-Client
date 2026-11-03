@@ -80,10 +80,8 @@ Space owners can also list their properties, manage their listings, and receive 
 | UI Components    | shadcn/ui, Base UI         |
 | Authentication   | Better Auth                |
 | Database         | MongoDB                    |
-| Date Handling    | date-fns, React Day Picker |
 | Icons            | Lucide React               |
 | Carousels        | Embla, Swiper              |
-| Charts           | Recharts                   |
 | Theme Management | next-themes                |
 | Package Manager  | Bun                        |
 | Code Quality     | ESLint, React Compiler     |

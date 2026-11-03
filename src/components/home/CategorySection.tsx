@@ -24,7 +24,7 @@ const categories = [
         meta: "text-primary-foreground/60",
     },
     {
-        name: "Sound Stages",
+        name: " Film Stage",
         category: "Film Stage",
         icon: Clapperboard,
         card: "bg-card border border-border text-card-foreground",

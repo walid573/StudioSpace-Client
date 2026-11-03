@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import CatergorySection from "@/components/home/CatergorySection";
+import CatergorySection from "@/components/home/CategorySection";
 import BookAndHost from "@/components/home/BookAndHost";
 import FeaturedStudios, { FeaturedStudiosSkeleton } from "@/components/home/FeaturedStudios";
 import HeroSection from "@/components/home/HeroSection";

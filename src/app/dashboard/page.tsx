@@ -9,7 +9,6 @@ import { getTokenFromServer } from "@/lib/getTokenFromSever";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 
-export const instant = false;
 
 type Studio = {
   _id: string;
@@ -43,7 +42,7 @@ async function getStudios(): Promise<Studio[]> {
 async function getBookings(email: string): Promise<Booking[]> {
   const token = await getTokenFromServer();
   const fetchOptions: RequestInit = {
-    next: { revalidate: 30 },
+     cache: "no-store",
     credentials: "include",
   };
 

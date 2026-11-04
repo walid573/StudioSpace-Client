@@ -39,7 +39,7 @@ async function getMyListings(email: string): Promise<Listing[]> {
   const token = await getTokenFromServer();
 
   const fetchOptions: RequestInit = {
-    next: { revalidate: 30 },
+    cache: "no-store",
     credentials: "include",
   };
 

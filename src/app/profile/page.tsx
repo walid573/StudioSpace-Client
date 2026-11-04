@@ -33,7 +33,7 @@ const BADGE =
 async function getArray<T>(url: string, authToken?: string): Promise<T[]> {
   try {
     const options: RequestInit = {
-      next: { revalidate: 60 },
+      cache: "no-store",
       credentials: "include",
     };
 

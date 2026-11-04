@@ -32,7 +32,7 @@ type Booking = {
 
 async function getStudios(): Promise<Studio[]> {
   const response = await fetch(`${API_URL}/studios`, {
-    next: { revalidate: 60 },
+    cache: "no-store",
   });
   if (!response.ok) return []; 
   return response.json();

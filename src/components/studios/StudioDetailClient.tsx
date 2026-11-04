@@ -1,4 +1,3 @@
-
 "use client";
 
 /* eslint-disable @next/next/no-img-element -- gallery URLs come from the API and can point at any host, so next/image cannot optimise them. */
@@ -13,6 +12,13 @@ import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -22,7 +28,7 @@ import { isImageSource } from "@/lib/images";
 import DeleteStudioDialog from "@/components/studios/DeleteStudioDialog";
 import EditStudioDialog, { type EditableStudio } from "@/components/studios/EditStudioDialog";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export type Studio = {
   _id: string;
@@ -49,26 +55,6 @@ export type Studio = {
   };
   reviews: { name: string; date: string; text: string }[];
 };
-
-const DEFAULT_SPECS = [
-  { label: "Space type", value: "Studio loft" },
-  { label: "Capacity", value: "12 guests" },
-  { label: "Setup", value: "Portrait / product / fashion" },
-  { label: "Access", value: "24/7 host access" },
-];
-
-const DEFAULT_REVIEWS = [
-  {
-    name: "Nadia S.",
-    date: "May 2026",
-    text: "Beautifully lit space and the host was extremely easy to coordinate with. The backdrop was perfect for our product shoot.",
-  },
-  {
-    name: "Tariq M.",
-    date: "Apr 2026",
-    text: "The room feels huge and the natural light is fantastic. Great for small team shoots and client meetings.",
-  },
-];
 
 async function getStudio(studioId: string): Promise<any | null> {
   const decoded = decodeURIComponent(studioId).trim();
@@ -128,6 +114,99 @@ function normalizeCapacity(value: unknown): string {
   return "Up to 12 people";
 }
 
+function normalizeSpecs(value: unknown): { label: string; value: string }[] {
+  // Support object form: { "Space type": "Loft", ... }
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return Object.entries(value as Record<string, unknown>)
+      .map(([label, val]) => ({
+        label: label.trim(),
+        value: String(val ?? "").trim(),
+      }))
+      .filter((s) => s.label && s.value);
+  }
+
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item: any) => ({
+      label: String(item?.label ?? "").trim(),
+      value: String(item?.value ?? "").trim(),
+    }))
+    .filter((s) => s.label && s.value);
+}
+
+function formatMoney(value: unknown): string | null {
+  const n = typeof value === "string" ? Number(value) : value;
+  if (typeof n !== "number" || !Number.isFinite(n)) return null;
+  return `$${n}`;
+}
+
+/**
+ * Builds the Specifications list from the studio's real fields.
+ * Custom specs saved on the studio (api.specs) are added too and
+ * override a derived row when the label matches.
+ */
+function buildSpecs(api: any): { label: string; value: string }[] {
+  const derived: { label: string; value: string }[] = [];
+
+  const push = (label: string, value: unknown) => {
+    const text = String(value ?? "").trim();
+    if (text) derived.push({ label, value: text });
+  };
+
+  push("Space type", api.category);
+
+  const capacityRaw = api.capacity ?? api.maxCapacity;
+  if (typeof capacityRaw === "number" && capacityRaw > 0) {
+    push("Capacity", `${capacityRaw} people`);
+  } else if (typeof capacityRaw === "string") {
+    const cleaned = capacityRaw.trim().replace(/^up to\s+/i, "");
+    push("Capacity", /^\d+$/.test(cleaned) ? `${cleaned} people` : cleaned);
+  }
+
+  const size = api.size ?? api.squareFeet ?? api.sqft;
+  if (typeof size === "number" && size > 0) {
+    push("Size", `${size} sq ft`);
+  } else if (typeof size === "string") {
+    push("Size", size);
+  }
+
+  const rate = formatMoney(api.hourlyRate);
+  if (rate) push("Hourly rate", `${rate} / hr`);
+
+  const deposit = formatMoney(api.securityDeposit);
+  if (deposit) push("Security deposit", deposit);
+
+  const area = api.location?.area ?? api.area;
+  const city = api.location?.city ?? api.city;
+  push("Location", [area, city].filter(Boolean).join(", "));
+  push("Address", api.location?.address ?? api.address);
+
+  if (Array.isArray(api.amenities) && api.amenities.length > 0) {
+    push("Amenities", `${api.amenities.length} included`);
+  }
+
+  const custom = normalizeSpecs(api.specs);
+  const customLabels = new Set(custom.map((s) => s.label.toLowerCase()));
+
+  return [
+    ...derived.filter((s) => !customLabels.has(s.label.toLowerCase())),
+    ...custom,
+  ];
+}
+
+function normalizeReviews(value: unknown): Studio["reviews"] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item: any) => ({
+      name: String(item?.name ?? item?.userName ?? "").trim(),
+      date: String(item?.date ?? item?.createdAt ?? "").trim(),
+      text: String(item?.text ?? item?.comment ?? "").trim(),
+    }))
+    .filter((r) => r.name && r.text);
+}
+
 const isGradient = (value: string) =>
   value.startsWith("linear-gradient") || value.startsWith("radial-gradient");
 
@@ -163,8 +242,8 @@ function transformStudio(api: any): Studio {
     capacity: normalizeCapacity(api.capacity ?? api.maxCapacity),
     description: api.description ?? api.overview ?? "",
     gallery: gallery.length ? gallery : [DEFAULT_GALLERY],
-    amenities: api.amenities ?? [],
-    specs: api.specs ?? DEFAULT_SPECS,
+    amenities: Array.isArray(api.amenities) ? api.amenities : [],
+    specs: buildSpecs(api),
     ownerEmail: api.ownerEmail ?? api.hostEmail,
     host: {
       name: api.hostName ?? api.ownerName ?? "Host",
@@ -173,7 +252,7 @@ function transformStudio(api: any): Studio {
       responseTime: api.hostResponseTime ?? "Usually replies in 1 hour",
       joined: api.hostJoined ?? "Joined in 2021",
     },
-    reviews: api.reviews ?? DEFAULT_REVIEWS,
+    reviews: normalizeReviews(api.reviews),
   };
 }
 
@@ -285,6 +364,7 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
 
   const [dateOpen, setDateOpen] = useState(false);
   const [hoursOpen, setHoursOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   const router = useRouter();
   const { data: session } = authClient.useSession();
@@ -394,23 +474,22 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
 
       const data = await response.json().catch(() => ({}));
 
-    
       if (response.status === 409) {
         setMessage({
           type: "error",
-          text: data.message || "This studio is already booked for this time. Please choose another time.",
+          text:
+            data.message ||
+            "This studio is already booked for this time. Please choose another time.",
         });
         return;
       }
 
-     
       if (!response.ok) {
         throw new Error(
           data.message || data.msg || data.error || "Booking failed. Please try again."
         );
       }
 
-      
       setMessage({
         type: "success",
         text: "Request sent! Status is Pending until the host confirms.",
@@ -542,20 +621,90 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
               {studio.description}
             </p>
 
-            <section className="mt-7">
-              <h2 className="text-[15px] font-semibold text-foreground">Amenities</h2>
+            {studio.amenities.length > 0 && (
+              <section className="mt-8 border-t border-border pt-8">
+                <h2 className="text-[15px] font-semibold text-foreground">Amenities</h2>
+                <div className="mt-4 flex flex-wrap gap-2.5">
+                  {studio.amenities.map((amenity) => (
+                    <span
+                      key={amenity}
+                      className="rounded-full border border-border bg-muted/40 px-3.5 py-1.5 text-[13px] text-foreground"
+                    >
+                      {amenity}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            )}
 
-              <div className="mt-3 flex flex-wrap gap-2">
-                {studio.amenities.map((item) => (
-                  <span
-                    key={item}
-                    className="rounded-full border border-border bg-muted px-2.5 py-1.5 text-[12px] text-foreground"
-                  >
-                    {item}
-                  </span>
-                ))}
+            {studio.specs.length > 0 && (
+              <section className="mt-8 border-t border-border pt-8">
+                <h2 className="text-[15px] font-semibold text-foreground">Specifications</h2>
+                <dl className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {studio.specs.map((spec) => (
+                    <div
+                      key={spec.label}
+                      className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-3.5 py-2.5"
+                    >
+                      <dt className="text-[13px] text-muted-foreground">{spec.label}</dt>
+                      <dd className="text-right text-[13px] font-medium text-foreground">
+                        {spec.value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            )}
+
+            <section className="mt-8 border-t border-border pt-8">
+              <h2 className="text-[15px] font-semibold text-foreground">About the host</h2>
+              <div className="mt-4 flex items-center gap-4 rounded-xl border border-border bg-card p-4">
+                {isImageSource(studio.host.avatar) ? (
+                  <img
+                    src={studio.host.avatar}
+                    alt={studio.host.name}
+                    className="size-12 shrink-0 rounded-full bg-muted object-cover"
+                  />
+                ) : (
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
+                    {studio.host.name ? studio.host.name.charAt(0).toUpperCase() : "H"}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="truncate font-semibold">{studio.host.name}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {studio.host.title} · {studio.host.joined}
+                  </p>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                    {studio.host.responseTime}
+                  </p>
+                </div>
               </div>
             </section>
+
+            {studio.reviews.length > 0 && (
+              <section className="mt-8 border-t border-border pt-8">
+                <h2 className="text-[15px] font-semibold text-foreground">Reviews</h2>
+                <div className="mt-4 space-y-4">
+                  {studio.reviews.map((review, i) => (
+                    <div
+                      key={i}
+                      className="border-b border-border pb-4 last:border-0 last:pb-0"
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium">{review.name}</p>
+                        {review.date && (
+                          <p className="text-xs text-muted-foreground">{review.date}</p>
+                        )}
+                      </div>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                        {review.text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
           <aside className="w-full self-start md:sticky md:top-6">
@@ -708,9 +857,7 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
                     {formatHoursLabel(hours)} {hours === 1 ? "hr" : "hrs"} × ${studio.hourlyRate}
                   </span>
 
-                  <span className="text-[15px] font-semibold text-foreground">
-                    ${total}
-                  </span>
+                  <span className="text-[15px] font-semibold text-foreground">${total}</span>
                 </div>
               </div>
 
@@ -752,7 +899,6 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
     </div>
   );
 }
-
 
 export function StudioDetailSkeleton() {
   return (

@@ -342,14 +342,14 @@ const Navbar = () => {
                         <div className="flex items-center gap-2">
                             <Link
                                 href="/login"
-                                className="rounded-lg border border-border px-3 py-2 text-xs font-semibold transition-colors hover:bg-accent sm:px-4 sm:text-sm"
+                                className="rounded-2xl border border-border px-5 py-2 text-xs font-semibold transition-colors hover:bg-accent sm:px-4 sm:text-sm"
                             >
                                 Login
                             </Link>
 
                             <Link
                                 href="/register"
-                                className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 sm:px-4 sm:text-sm"
+                                className="rounded-2xl bg-primary px-2 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 sm:px-4 sm:text-sm"
                             >
                                 Register
                             </Link>

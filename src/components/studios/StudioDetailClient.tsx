@@ -195,6 +195,50 @@ function buildSpecs(api: any): { label: string; value: string }[] {
   ];
 }
 
+function formatMonthYear(value: unknown): string {
+  if (typeof value !== "string" && typeof value !== "number") return "";
+  const parsed = typeof value === "number" ? new Date(value) : parseISO(value);
+  return Number.isNaN(parsed.getTime()) ? "" : format(parsed, "MMM yyyy");
+}
+
+/**
+ * Builds the host card from real fields only. Anything the API does not
+ * provide stays empty, and the UI hides that line.
+ */
+function buildHost(api: any): Studio["host"] {
+  const owner = api.host ?? api.owner ?? {};
+
+  const name = String(
+    api.hostName ?? api.ownerName ?? owner.name ?? ""
+  ).trim();
+
+  const avatar = String(
+    api.hostAvatar ?? api.ownerAvatar ?? owner.image ?? owner.avatar ?? ""
+  ).trim();
+
+  const verified =
+    api.hostVerified ?? api.ownerVerified ?? owner.emailVerified ?? owner.verified;
+
+  const customTitle = String(api.hostTitle ?? api.ownerTitle ?? "").trim();
+  const title = customTitle || (verified === true ? "Verified host" : "Host");
+
+  // Prefer the host's own account date; fall back to when this listing was created.
+  const hostJoinedRaw =
+    api.hostJoinedAt ?? api.hostJoined ?? owner.createdAt ?? api.ownerCreatedAt;
+  const hostJoined = formatMonthYear(hostJoinedRaw);
+  const listedSince = formatMonthYear(api.createdAt);
+
+  const joined = hostJoined
+    ? `Joined ${hostJoined}`
+    : listedSince
+      ? `Listed ${listedSince}`
+      : "";
+
+  const responseTime = String(api.hostResponseTime ?? owner.responseTime ?? "").trim();
+
+  return { name, avatar, title, responseTime, joined };
+}
+
 function normalizeReviews(value: unknown): Studio["reviews"] {
   if (!Array.isArray(value)) return [];
 
@@ -245,13 +289,7 @@ function transformStudio(api: any): Studio {
     amenities: Array.isArray(api.amenities) ? api.amenities : [],
     specs: buildSpecs(api),
     ownerEmail: api.ownerEmail ?? api.hostEmail,
-    host: {
-      name: api.hostName ?? api.ownerName ?? "Host",
-      avatar: api.hostAvatar ?? api.ownerAvatar ?? "",
-      title: api.hostTitle ?? api.ownerTitle ?? "Verified host",
-      responseTime: api.hostResponseTime ?? "Usually replies in 1 hour",
-      joined: api.hostJoined ?? "Joined in 2021",
-    },
+    host: buildHost(api),
     reviews: normalizeReviews(api.reviews),
   };
 }
@@ -671,13 +709,15 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
                   </div>
                 )}
                 <div className="min-w-0">
-                  <p className="truncate font-semibold">{studio.host.name}</p>
+                  <p className="truncate font-semibold">{studio.host.name || "Host"}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {studio.host.title} · {studio.host.joined}
+                    {[studio.host.title, studio.host.joined].filter(Boolean).join(" · ")}
                   </p>
-                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                    {studio.host.responseTime}
-                  </p>
+                  {studio.host.responseTime && (
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                      {studio.host.responseTime}
+                    </p>
+                  )}
                 </div>
               </div>
             </section>

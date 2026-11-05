@@ -540,10 +540,21 @@ const StudioForm = () => {
           <SectionCard title="Host details" subtitle="Guests see this after they book, and cannot change it later.">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Host name">
-                <input className={inputClass} {...bind("hostName", hostName)} />
+                <input
+                  className={`${inputClass} cursor-not-allowed text-muted-foreground`}
+                  {...bind("hostName", hostName)}
+                  readOnly
+                  tabIndex={-1}
+                />
               </Field>
               <Field label="Host email">
-                <input type="email" className={inputClass} {...bind("hostEmail", hostEmail)} />
+                <input
+                  type="email"
+                  className={`${inputClass} cursor-not-allowed text-muted-foreground`}
+                  {...bind("hostEmail", hostEmail)}
+                  readOnly
+                  tabIndex={-1}
+                />
               </Field>
             </div>
           </SectionCard>

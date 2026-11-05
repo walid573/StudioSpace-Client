@@ -296,6 +296,16 @@ const StudioForm = () => {
       }
 
       finish("success", "Studio added", `${title} is now listed.`);
+
+      // Reset the form and the upload state so nothing lingers when the
+      // user (or the back/forward cache) returns to this page.
+      setForm({
+        ...INITIAL_FORM,
+        amenities: [...INITIAL_FORM.amenities],
+      });
+      upload.reset();
+      if (fileInputRef.current) fileInputRef.current.value = "";
+
       router.push("/my-listings");
       router.refresh();
     } catch {

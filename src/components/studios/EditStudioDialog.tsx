@@ -156,7 +156,7 @@ function StudioForm({ studio, onDone }: { studio: EditableStudio; onDone: () => 
       let imageUrl = url;
       let upload: File | null = file;
 
-     
+
       if (!upload && imageUrl.startsWith("data:image/")) {
         const blob = await (await fetch(imageUrl)).blob();
         upload = new File([blob], "cover.jpg", { type: blob.type || "image/jpeg" });

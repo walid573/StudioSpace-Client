@@ -5,7 +5,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { format, parseISO, startOfToday } from "date-fns";
-import { ChevronDown, Compass, Star } from "lucide-react";
+import { ChevronDown, Compass, Pencil, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -26,7 +26,6 @@ import { authClient } from "@/lib/auth-client";
 import { getTokenFromClient } from "@/lib/getTokenFromClient";
 import { isImageSource } from "@/lib/images";
 import DeleteStudioDialog from "@/components/studios/DeleteStudioDialog";
-import EditStudioDialog, { type EditableStudio } from "@/components/studios/EditStudioDialog";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -384,8 +383,6 @@ function formatHoursLabel(hours: number) {
 
 export default function StudioDetailClient({ studioId }: { studioId: string }) {
   const [studio, setStudio] = useState<Studio | null>(null);
-  const [rawStudio, setRawStudio] = useState<EditableStudio | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   const [booking, setBooking] = useState<BookingState>({
@@ -420,10 +417,8 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
 
       if (api) {
         setStudio(transformStudio(api));
-        setRawStudio(api as EditableStudio);
       } else {
         setStudio(null);
-        setRawStudio(null);
       }
 
       setIsLoading(false);
@@ -434,7 +429,7 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
     return () => {
       cancelled = true;
     };
-  }, [studioId, refreshKey]);
+  }, [studioId]);
 
   const { hours, error } = useMemo(() => {
     const diff = (toMinutes(booking.end) - toMinutes(booking.start)) / 60;
@@ -626,13 +621,13 @@ export default function StudioDetailClient({ studioId }: { studioId: string }) {
 
               {canManage && (
                 <div className="flex shrink-0 items-center gap-2 pt-1">
-                  {rawStudio && (
-                    <EditStudioDialog
-                      studio={rawStudio}
-                      triggerClassName="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-transparent px-4 text-[12px] font-medium text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                      onUpdated={() => setRefreshKey((key) => key + 1)}
-                    />
-                  )}
+                  <Link
+                    href={`/studios/edit/${studio._id}`}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-transparent px-4 text-[12px] font-medium text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                  >
+                    <Pencil className="size-3.5" aria-hidden="true" />
+                    Edit
+                  </Link>
 
                   <DeleteStudioDialog
                     studioId={studio._id}

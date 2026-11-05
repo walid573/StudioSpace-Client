@@ -217,7 +217,7 @@ async function MyListingsContent() {
 
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
-                          <EditStudioDialog
+                  <EditStudioDialog
                             studio={listing}
                             label="Update"
                             triggerClassName={GHOST_BUTTON}

@@ -115,7 +115,7 @@ function normalizeCapacity(value: unknown): string {
 }
 
 function normalizeSpecs(value: unknown): { label: string; value: string }[] {
-  // Support object form: { "Space type": "Loft", ... }
+ 
   if (value && typeof value === "object" && !Array.isArray(value)) {
     return Object.entries(value as Record<string, unknown>)
       .map(([label, val]) => ({
@@ -222,7 +222,7 @@ function buildHost(api: any): Studio["host"] {
   const customTitle = String(api.hostTitle ?? api.ownerTitle ?? "").trim();
   const title = customTitle || (verified === true ? "Verified host" : "Host");
 
-  // Prefer the host's own account date; fall back to when this listing was created.
+  
   const hostJoinedRaw =
     api.hostJoinedAt ?? api.hostJoined ?? owner.createdAt ?? api.ownerCreatedAt;
   const hostJoined = formatMonthYear(hostJoinedRaw);

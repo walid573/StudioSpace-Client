@@ -6,6 +6,7 @@ import { useState, type FormEvent } from "react";
 import { Check, Circle, Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { GoogleIcon } from "@/components/auth/google-icon";
+import ImageUploadField from "@/components/images/ImageUploadField";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,117 +17,75 @@ import { toast } from "../ui/toast";
 const inputClass =
   "h-11 rounded-xl border-input bg-background px-3 text-[14px] text-foreground placeholder:text-muted-foreground transition-colors focus-visible:border-ring focus-visible:ring-ring/10";
 
-type FieldErrors = {
-  name?: string;
-  email?: string;
-  photoUrl?: string;
-};
+const PASSWORD_RULES = [
+  { label: "At least 6 characters", test: (p: string) => p.length >= 6 },
+  { label: "One uppercase letter", test: (p: string) => /[A-Z]/.test(p) },
+  { label: "One lowercase letter", test: (p: string) => /[a-z]/.test(p) },
+];
 
 export default function RegisterForm() {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [photoUrl, setPhotoUrl] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
-  const pending = submitting || googleLoading;
+  const pending = submitting || googleLoading || uploadingPhoto;
+  const rules = PASSWORD_RULES.map((r) => ({ label: r.label, met: r.test(form.password) }));
+  const passwordValid = rules.every((r) => r.met);
 
-  const passwordRules = [
-    { label: "At least 6 characters", met: password.length >= 6 },
-    { label: "One uppercase letter", met: /[A-Z]/.test(password) },
-    { label: "One lowercase letter", met: /[a-z]/.test(password) },
-  ];
-  const passwordValid = passwordRules.every((rule) => rule.met);
-  const highlightUnmetRules = password.length > 0 || attemptedSubmit;
+  const set = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm((f) => ({ ...f, [field]: e.target.value }));
 
-  function clearFieldError(field: keyof FieldErrors) {
-    setFieldErrors((current) => {
-      if (!current[field]) return current;
-      return { ...current, [field]: undefined };
-    });
-  }
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (pending) return;
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-  event.preventDefault();
-  setError(null);
+    if (!form.name.trim()) return setError("Enter your full name.");
+    if (!form.email.trim()) return setError("Enter your email.");
+    if (!passwordValid) return setError("Choose a password that meets all the requirements.");
 
-  if (!name.trim()) {
-    setError("Enter your full name.");
-    return;
-  }
+    setError(null);
+    setSubmitting(true);
 
-  if (!passwordValid) {
-    setError("Choose a password that meets all the requirements.");
-    
-    return;
-  }
+    try {
+      const { error: authError } = await signUp.email({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+        image: photoUrl || undefined,
+      });
 
-  setSubmitting(true);
+      if (authError) {
+        return setError(getAuthErrorMessage(authError, "We couldn't create your account. Please try again."));
+      }
 
-  try {
-    const { error } = await signUp.email({
-      name: name.trim(),
-      email: email.trim(),
-      password,
-      image: photoUrl.trim() || undefined,
-    });
-
-    if (error) {
-      
-      setError(
-        getAuthErrorMessage(error, "We couldn't create your account. Please try again."),
-      );
-      return;
+      toast.add({ title: "Account created", description: "Welcome aboard.", type: "success" });
+      router.replace("/");
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
-
-    setName("");
-    setEmail("");
-    setPhotoUrl("");
-    setPassword("");
-     toast.add({
-      title: "Account created",
-      description: "Please log in to continue.",
-      type: "success",
-    });
-    router.replace("/");
-  } catch {
-    setError("Something went wrong. Please try again.");
-  } finally {
-    setSubmitting(false);
   }
-}
+
   async function handleGoogleSignUp() {
     setError(null);
     setGoogleLoading(true);
 
+    const fail = (message: string) => {
+      setError(message);
+      toast.add({ title: "Google sign-up failed", description: message, type: "error" });
+    };
+
     try {
-      const { error: socialError } = await signIn.social({
-        provider: "google",
-        callbackURL: "/",
-      });
-      
-      if (socialError) {
-        toast.add({
-          title: "Google sign-up failed",
-          description: getAuthErrorMessage(socialError, "Please try again."),
-          type: "error",
-        });
-        setError(
-          getAuthErrorMessage(socialError, "Google sign-up failed. Please try again."),
-        );
-      }
+      const { error: socialError } = await signIn.social({ provider: "google", callbackURL: "/" });
+      if (socialError) fail(getAuthErrorMessage(socialError, "Google sign-up failed. Please try again."));
     } catch {
-      toast.add({
-        title: "Google sign-up failed",
-        description: "Please try again.",
-        type: "error",
-      });
+      fail("Google sign-up failed. Please try again.");
     } finally {
       setGoogleLoading(false);
     }
@@ -149,20 +108,12 @@ export default function RegisterForm() {
           <Input
             id="register-name"
             name="name"
-            type="text"
             autoComplete="name"
             placeholder="Your full name"
-            value={name}
-            aria-invalid={Boolean(fieldErrors.name)}
-            onChange={(event) => {
-              setName(event.target.value);
-              clearFieldError("name");
-            }}
+            value={form.name}
+            onChange={set("name")}
             className={inputClass}
           />
-          {fieldErrors.name && (
-            <p className="text-[11px] text-red-400">{fieldErrors.name}</p>
-          )}
         </div>
 
         <div className="space-y-1.5">
@@ -175,45 +126,19 @@ export default function RegisterForm() {
             type="email"
             autoComplete="email"
             placeholder="you@example.com"
-            value={email}
-            aria-invalid={Boolean(fieldErrors.email)}
-            onChange={(event) => {
-              setEmail(event.target.value);
-              clearFieldError("email");
-            }}
+            value={form.email}
+            onChange={set("email")}
             className={inputClass}
           />
-          {fieldErrors.email && (
-            <p className="text-[11px] text-red-400">{fieldErrors.email}</p>
-          )}
         </div>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="register-photo" className="text-[12px] font-medium text-foreground">
-            Photo URL
-          </Label>
-          <Input
-            id="register-photo"
-            name="photoUrl"
-            type="url"
-            inputMode="url"
-            placeholder="https://i.ibb.co/your-photo.jpg"
-            value={photoUrl}
-            aria-invalid={Boolean(fieldErrors.photoUrl)}
-            onChange={(event) => {
-              setPhotoUrl(event.target.value);
-              clearFieldError("photoUrl");
-            }}
-            className={inputClass}
-          />
-          {fieldErrors.photoUrl ? (
-            <p className="text-[11px] text-red-400">{fieldErrors.photoUrl}</p>
-          ) : (
-            <p className="text-[11px] leading-4 text-muted-foreground">
-              A link to your profile picture
-            </p>
-          )}
-        </div>
+        <ImageUploadField
+          value={photoUrl}
+          onChange={setPhotoUrl}
+          onUploadingChange={setUploadingPhoto}
+          fallback={form.name}
+          label="Profile photo"
+        />
 
         <div className="space-y-1.5">
           <Label htmlFor="register-password" className="text-[12px] font-medium text-foreground">
@@ -226,15 +151,15 @@ export default function RegisterForm() {
               type={showPassword ? "text" : "password"}
               autoComplete="new-password"
               placeholder="Create a password"
-              value={password}
-              aria-invalid={password.length > 0 && !passwordValid}
+              value={form.password}
+              aria-invalid={form.password.length > 0 && !passwordValid}
               aria-describedby="register-password-rules"
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={set("password")}
               className={`${inputClass} pr-10`}
             />
             <button
               type="button"
-              onClick={() => setShowPassword((visible) => !visible)}
+              onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? "Hide password" : "Show password"}
               className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
             >
@@ -243,23 +168,14 @@ export default function RegisterForm() {
           </div>
 
           <ul id="register-password-rules" className="space-y-1.5 pt-1">
-            {passwordRules.map((rule) => (
+            {rules.map(({ label, met }) => (
               <li
-                key={rule.label}
-                className={`flex items-center gap-1.5 text-[11px] leading-4 ${
-                  rule.met
-                    ? "text-neutral-300"
-                    : highlightUnmetRules
-                      ? "text-red-400"
-                      : "text-neutral-500"
-                }`}
+                key={label}
+                className={`flex items-center gap-1.5 text-[11px] leading-4 ${met ? "text-neutral-300" : form.password ? "text-red-400" : "text-neutral-500"
+                  }`}
               >
-                {rule.met ? (
-                  <Check className="size-3 shrink-0 text-emerald-400" />
-                ) : (
-                  <Circle className="size-3 shrink-0" />
-                )}
-                {rule.label}
+                {met ? <Check className="size-3 shrink-0 text-emerald-400" /> : <Circle className="size-3 shrink-0" />}
+                {label}
               </li>
             ))}
           </ul>
@@ -280,7 +196,7 @@ export default function RegisterForm() {
           className="h-11 w-full gap-2 rounded-full bg-primary text-[13px] font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
         >
           {submitting && <Loader2 className="size-4 animate-spin" />}
-          {submitting ? "Creating account…" : "Register"}
+          {submitting ? "Creating account…" : uploadingPhoto ? "Uploading photo…" : "Register"}
         </Button>
       </form>
 
@@ -297,11 +213,7 @@ export default function RegisterForm() {
         onClick={handleGoogleSignUp}
         className="h-11 w-full gap-2 rounded-full border-border bg-transparent text-[13px] font-medium text-foreground hover:bg-accent hover:text-foreground disabled:opacity-60"
       >
-        {googleLoading ? (
-          <Loader2 className="size-4 animate-spin" />
-        ) : (
-          <GoogleIcon className="size-4" />
-        )}
+        {googleLoading ? <Loader2 className="size-4 animate-spin" /> : <GoogleIcon className="size-4" />}
         Continue with Google
       </Button>
 

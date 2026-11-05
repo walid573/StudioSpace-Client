@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import ImageUploadField from "@/components/images/ImageUploadField";
 import {
   Dialog,
   DialogClose,
@@ -39,6 +40,7 @@ export default function EditProfileDialog({
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>({ name, image: image ?? "" });
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
@@ -53,6 +55,7 @@ export default function EditProfileDialog({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (uploadingPhoto) return;
 
     const nextName = form.name.trim();
     if (!nextName) {
@@ -118,25 +121,20 @@ export default function EditProfileDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="profile-image" className="text-[12px] text-muted-foreground">
-              Profile photo URL
-            </Label>
-            <Input
-              id="profile-image"
+            <ImageUploadField
               value={form.image}
-              onChange={(event) => update("image", event.target.value)}
-              placeholder="https://example.com/photo.jpg"
-              inputMode="url"
+              onChange={(url) => update("image", url)}
+              onUploadingChange={setUploadingPhoto}
+              fallback={form.name}
+              label="Profile photo"
+              hint="JPG or PNG, up to 5 MB. Leave blank to use your initials."
             />
-            <p className="text-[11px] text-muted-foreground">
-              Leave blank to use your initials.
-            </p>
           </div>
 
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" />}>Cancel</DialogClose>
-            <Button type="submit" disabled={saving}>
-              {saving ? "Saving." : "Save changes"}
+            <Button type="submit" disabled={saving || uploadingPhoto}>
+              {saving ? "Saving." : uploadingPhoto ? "Uploading." : "Save changes"}
             </Button>
           </DialogFooter>
         </form>

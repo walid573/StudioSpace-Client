@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element -- previews show user-typed URLs from any host, so next/image cannot optimize them. */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
@@ -17,7 +17,6 @@ import {
 import { toast } from "../ui/toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 
 const CATEGORIES = ["Photo Studio", "Film Stage", "Podcast Lounge", "Music Suite", "Workshop"];
 
@@ -118,20 +117,19 @@ const IDLE: UploadState = { status: "idle", progress: 0, url: "", error: null };
 function usePhotoUpload() {
   const [file, setFile] = useState<File | null>(null);
   const [state, setState] = useState<UploadState>(IDLE);
-  const [localUrl, setLocalUrl] = useState("");
+  const localUrl = useMemo(
+    () => (file ? URL.createObjectURL(file) : ""),
+    [file],
+  );
   const abortRef = useRef<AbortController | null>(null);
   const pendingRef = useRef<Promise<string> | null>(null);
 
- 
+  // Revoke the previous blob URL when the file changes or the component unmounts.
   useEffect(() => {
-    if (!file) {
-      setLocalUrl("");
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    setLocalUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [file]);
+    return () => {
+      if (file && localUrl) URL.revokeObjectURL(localUrl);
+    };
+  }, [file, localUrl]);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
@@ -146,7 +144,6 @@ function usePhotoUpload() {
 
     const run = uploadToImgBB(
       next,
-      IMGBB_API_KEY ?? "",
       (progress) => setState((s) => ({ ...s, progress })),
       ctrl.signal,
     )

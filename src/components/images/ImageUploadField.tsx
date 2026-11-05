@@ -23,8 +23,6 @@ type Props = {
   className?: string;
 };
 
-const API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY ?? "";
-
 export default function ImageUploadField({
   value,
   onChange,
@@ -62,7 +60,7 @@ export default function ImageUploadField({
     setProgress(0);
 
     try {
-      const { url } = await uploadToImgBB(file, API_KEY, setProgress, c.signal);
+      const { url } = await uploadToImgBB(file, setProgress, c.signal);
       if (c.signal.aborted) return;
       setTyped("");
       onChange(url);

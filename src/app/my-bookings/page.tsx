@@ -243,10 +243,13 @@ export default function MyBookingsPage() {
 
                   
 
-                  {(status === "pending" || status === "cancelled") && (
-                    <DeleteBooking bookingId={booking._id}
+                  {status === "pending" && (
+                    <DeleteBooking
+                      bookingId={booking._id}
                       studioTitle={studio?.title}
-                      onDeleted={handleDeleted} />
+                      label="Cancel Booking"
+                      onDeleted={handleDeleted}
+                    />
                   )}
 
                   {status === "confirmed" && <button type="button" className={PRIMARY_BUTTON}>View details</button>}

@@ -5,8 +5,8 @@ export type ImgBBUploadResult = {
   thumbUrl: string;
 };
 
-type ImgBBResponse = {
-  success: boolean;
+type UploadResponse = {
+  success?: boolean;
   error?: { message?: string };
   data?: {
     url: string;
@@ -16,7 +16,8 @@ type ImgBBResponse = {
   };
 };
 
-const ENDPOINT = "https://api.imgbb.com/1/upload";
+/** Uploads go through the server proxy so the ImgBB key never reaches the browser. */
+const ENDPOINT = "/api/upload";
 export const IMGBB_MAX_BYTES = 5 * 1024 * 1024;
 export const IMGBB_ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
@@ -29,16 +30,13 @@ export function isAcceptedImage(file: File): boolean {
 
 export async function uploadToImgBB(
   file: File,
-  apiKey: string,
   onProgress?: (percent: number) => void,
   signal?: AbortSignal,
 ): Promise<ImgBBUploadResult> {
-  if (!apiKey) throw new Error("ImgBB API key is missing.");
   if (!isAcceptedImage(file)) throw new Error("That file is not a JPG, PNG, WebP or GIF image.");
   if (file.size > IMGBB_MAX_BYTES) throw new Error("Image is larger than 5 MB.");
 
   const body = new FormData();
-  body.append("key", apiKey);
   body.append("image", file);
 
   return new Promise((resolve, reject) => {
@@ -54,7 +52,7 @@ export async function uploadToImgBB(
     };
 
     xhr.onload = () => {
-      let res: ImgBBResponse | undefined;
+      let res: UploadResponse | undefined;
       try {
         res = JSON.parse(xhr.responseText);
       } catch {
@@ -63,7 +61,7 @@ export async function uploadToImgBB(
 
       const d = res?.data;
       if (!res?.success || !d) {
-        return fail(res?.error?.message ?? `ImgBB upload failed (HTTP ${xhr.status}).`);
+        return fail(res?.error?.message ?? `Image upload failed (HTTP ${xhr.status}).`);
       }
 
       onProgress?.(100);
@@ -75,8 +73,8 @@ export async function uploadToImgBB(
       });
     };
 
-    xhr.onerror = () => fail("Could not reach ImgBB. Check your connection and try again.");
-    xhr.ontimeout = () => fail("The upload to ImgBB timed out. Try a smaller image.");
+    xhr.onerror = () => fail("Could not reach the upload service. Check your connection and try again.");
+    xhr.ontimeout = () => fail("The image upload timed out. Try a smaller image.");
     xhr.onabort = () => fail("Upload cancelled.");
 
     xhr.send(body);

@@ -280,6 +280,25 @@ To deploy your own instance:
 
 ---
 
+## 🔑 Examiner Test Credentials
+
+Use the following account to explore the live site without registering:
+
+| Field        | Value                         |
+| ------------ | ----------------------------- |
+| **Live URL** | https://studiospace1.vercel.app/login |
+| **Email**    | examiner@studiospace.com      |
+| **Password** | Examiner@123                  |
+
+**Suggested walkthrough:**
+
+1. Log in with the credentials above.
+2. Browse `/studios` and open any studio to see its details and booking panel.
+3. Submit a booking request, then check its status under `/my-bookings`.
+4. Add, edit, or delete a listing from `/add-studio` and `/my-listings`.
+
+> **Note:** You can't book a studio you own. To test booking, choose a studio listed by another user.
+
 ## 🔮 Future Improvements
 
 Potential enhancements for the platform include:

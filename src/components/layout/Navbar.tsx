@@ -109,10 +109,7 @@ const Navbar = () => {
             : pathname === href || pathname.startsWith(`${href}/`);
 
     async function loadBookings() {
-        if (!email) {
-            setBookings([]);
-            return;
-        }
+        if (!email) return;
 
         try {
             const token = await getTokenFromClient();
@@ -152,7 +149,14 @@ const Navbar = () => {
     }
 
     useEffect(() => {
-        loadBookings();
+        if (!email) return;
+        // Deferred so the fetch result triggers setState from a callback,
+        // not synchronously during the effect (react-hooks/set-state-in-effect).
+        const timer = setTimeout(() => {
+            void loadBookings();
+        }, 0);
+        return () => clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [email]);
 
     async function handleSignOut() {

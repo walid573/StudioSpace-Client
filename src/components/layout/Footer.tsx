@@ -1,32 +1,24 @@
-import Image from "next/image";
-import Link from "next/link";
+"use client";
 
-const categories = [
-    { name: "Photo Studios", href: "/studios?category=photo-studios" },
-    { name: "Sound Stages", href: "/studios?category=sound-stages" },
-    { name: "Podcast Rooms", href: "/studios?category=podcast-rooms" },
-    { name: "Music Suites", href: "/studios?category=music-suites" },
-    { name: "Art Workshops", href: "/studios?category=art-workshops" },
+import Link from "next/link";
+import { useState } from "react";
+
+import { toast } from "@/components/ui/toast";
+
+const quickLinks = [
+    { name: "Home", href: "/" },
+    { name: "Explore Studios", href: "/studios" },
+    { name: "How It Works", href: "/how-it-works" },
+    { name: "About Us", href: "/about-us" },
 ];
 
-function LogoMark({ size = 28 }: { size?: number }) {
-    return (
-        <svg
-            width={size}
-            height={size}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-        >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 2l4 7M22 12h-8M17 20l-4-7M7 20l2-8M2 12l8-1M7 4l5 8" />
-        </svg>
-    );
-}
+const categories = [
+    { name: "Photo Studios", href: "/studios?category=Photo Studio" },
+    { name: "Film Stage", href: "/studios?category=Film Stage" },
+    { name: "Podcast Rooms", href: "/studios?category=Podcast Lounge" },
+    { name: "Music Suites", href: "/studios?category=Music Suite" },
+    { name: "Art Workshops", href: "/studios?category=Workshop" },
+];
 
 const socials = [
     {
@@ -56,42 +48,143 @@ const socials = [
     },
 ];
 
+function LogoMark({ size = 28 }: { size?: number }) {
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 2l4 7M22 12h-8M17 20l-4-7M7 20l2-8M2 12l8-1M7 4l5 8" />
+        </svg>
+    );
+}
+
+const headingClass =
+    "text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70";
+const linkListClass = "mt-3.5 grid gap-2";
+const linkClass =
+    "w-fit text-[13px] text-muted-foreground/70 transition-colors hover:text-foreground";
+
 const Footer = () => {
+    const [newsletterEmail, setNewsletterEmail] = useState("");
+    const [subscribing, setSubscribing] = useState(false);
+
+    async function subscribe(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        const email = newsletterEmail.trim();
+
+        if (subscribing) return;
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            toast.add({
+                title: "Enter a valid email",
+                description: "The newsletter needs an email like you@example.com.",
+                type: "error",
+            });
+            return;
+        }
+
+        setSubscribing(true);
+        try {
+            await new Promise((resolve) => setTimeout(resolve, 600));
+            toast.add({
+                title: "You're subscribed",
+                description: "StudioSpace news and location tips will land in your inbox.",
+                type: "success",
+            });
+            setNewsletterEmail("");
+        } catch {
+            toast.add({
+                title: "Subscription failed",
+                description: "Please try again in a moment.",
+                type: "error",
+            });
+        } finally {
+            setSubscribing(false);
+        }
+    }
+
     return (
         <footer className="border-t border-border bg-background text-foreground">
-            <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-12 sm:px-6 md:flex-row md:items-start md:justify-between lg:px-8 lg:py-14">
+            <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.2fr_0.8fr_0.9fr_1.1fr] lg:px-8 lg:py-14">
+                {/* Brand + mission */}
                 <div className="max-w-sm">
                     <Link href="/" className="flex w-fit items-center gap-2">
-                        {/* <Image src="/logo.png" alt="StudioSpace" width={28} height={28} /> */}
-                        <LogoMark/>
-                        <span className="text-xl font-semibold tracking-[-0.01em] whitespace-nowrap">StudioSpace</span>
+                        <LogoMark />
+                        <span className="whitespace-nowrap text-xl font-semibold tracking-[-0.01em]">
+                            StudioSpace
+                        </span>
                     </Link>
                     <p className="mt-4 text-[13px] leading-relaxed text-muted-foreground/60">
-                        Book creative spaces from people who make things. Photo, sound, podcast and art studios in one place.
+                        Book creative spaces from people who make things. Photo, sound,
+                        podcast and art studios in one place.
                     </p>
                 </div>
 
-                <div className="flex flex-col gap-8">
-                    <nav aria-label="Studio categories">
-                        <ul className="flex max-w-sm flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted-foreground/60">
-                            {categories.map((category, index) => (
-                                <li key={category.name} className="flex items-center gap-2">
-                                    <Link
-                                        href={category.href}
-                                        className="whitespace-nowrap transition-colors hover:text-foreground"
-                                    >
-                                        {category.name}
-                                    </Link>
-                                    {index < categories.length - 1 && (
-                                        <span aria-hidden="true" className="text-muted-foreground/30">·</span>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-                    </nav>
+                {/* Quick links */}
+                <div>
+                    <p className={headingClass}>Quick links</p>
+                    <ul className={linkListClass}>
+                        {quickLinks.map((link) => (
+                            <li key={link.name}>
+                                <Link href={link.href} className={linkClass}>
+                                    {link.name}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
 
-                    <div>
-                        <p className="text-[13px] text-muted-foreground/60">Follow us</p>
+                {/* Popular categories */}
+                <div>
+                    <p className={headingClass}>Popular categories</p>
+                    <ul className={linkListClass}>
+                        {categories.map((category) => (
+                            <li key={category.name}>
+                                <Link href={category.href} className={linkClass}>
+                                    {category.name}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                {/* Newsletter + socials */}
+                <div>
+                    <p className={headingClass}>Studio thoughts, monthly</p>
+                    <form onSubmit={subscribe} className="mt-3.5 flex gap-2">
+                        <label className="sr-only" htmlFor="footer-newsletter">
+                            Email address
+                        </label>
+                        <input
+                            id="footer-newsletter"
+                            type="email"
+                            value={newsletterEmail}
+                            onChange={(e) => setNewsletterEmail(e.target.value)}
+                            placeholder="you@example.com"
+                            className="h-9 w-full min-w-0 rounded-full border border-border bg-muted/40 px-4 text-[13px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-ring"
+                        />
+                        <button
+                            type="submit"
+                            disabled={subscribing}
+                            className="h-9 shrink-0 rounded-full bg-primary px-4 text-[12px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {subscribing ? "Joining…" : "Subscribe"}
+                        </button>
+                    </form>
+                    <p className="mt-3 text-[11px] text-muted-foreground/50">
+                        Booking guides and host tips. Unsubscribe anytime.
+                    </p>
+
+                    <div className="mt-6">
+                        <p className={headingClass}>Follow us</p>
                         <ul className="mt-3 flex items-center gap-2">
                             {socials.map((social) => (
                                 <li key={social.name}>
@@ -115,6 +208,18 @@ const Footer = () => {
                             ))}
                         </ul>
                     </div>
+                </div>
+            </div>
+
+            {/* Copyright + terms notice */}
+            <div className="border-t border-border">
+                <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-[12px] text-muted-foreground/60 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+                    <p>© 2026 StudioSpace. All rights reserved.</p>
+                    <p>
+                        By booking or hosting you agree to our Terms of Service and
+                        cancellation policy. Creators own the media they shoot; hosts set
+                        the house rules.
+                    </p>
                 </div>
             </div>
         </footer>

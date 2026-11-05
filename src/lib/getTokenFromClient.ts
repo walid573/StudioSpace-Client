@@ -16,7 +16,10 @@ export const getTokenFromClient = async (): Promise<string | null> => {
       const result = await run();
       if (!result) continue;
 
-      const payload = result as any;
+      const payload = result as {
+        data?: { token?: string | null } | null;
+        token?: string | null;
+      } | null;
       const token = payload?.data?.token ?? payload?.token ?? null;
       if (typeof token === "string" && token.trim()) return token.trim();
     } catch {

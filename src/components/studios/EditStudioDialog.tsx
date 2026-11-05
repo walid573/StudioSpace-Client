@@ -12,8 +12,6 @@ import {
 import { toast } from "@/components/ui/toast";
 import { getTokenFromClient } from "@/lib/getTokenFromClient";
 import { IMGBB_MAX_BYTES, isAcceptedImage, uploadToImgBB } from "@/lib/imgbb-upload";
-
-const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 const CATEGORIES = ["Photo Studio", "Film Stage", "Podcast Lounge", "Music Suite", "Workshop"];
 const AMENITIES = [
   "Professional lighting", "Backdrop system", "Soundproofing", "Parking", "Green room",
@@ -69,11 +67,7 @@ function describeError(error: unknown) {
 }
 
 async function uploadImage(file: File): Promise<string> {
-  if (!IMGBB_API_KEY) {
-    throw new Error("Image upload is not configured (NEXT_PUBLIC_IMGBB_API_KEY is missing).");
-  }
-
-  const uploaded = await uploadToImgBB(file, IMGBB_API_KEY);
+  const uploaded = await uploadToImgBB(file);
   return uploaded.url;
 }
 

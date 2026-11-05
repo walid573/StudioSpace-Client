@@ -95,12 +95,17 @@ function Carousel({
 
   React.useEffect(() => {
     if (!api) return
-    onSelect(api)
-    api.on("reInit", onSelect)
-    api.on("select", onSelect)
+    // Deviation from the generated template: sync initial onSelect ran
+    // onSelect -> setState synchronously inside the effect, which the
+    // react-hooks/set-state-in-effect rule rejects. Defer the initial sync.
+    const initial = setTimeout(() => onSelect(api), 0)
+    const onSelectRef = onSelect
+    api.on("reInit", onSelectRef)
+    api.on("select", onSelectRef)
 
     return () => {
-      api?.off("select", onSelect)
+      clearTimeout(initial)
+      api?.off("select", onSelectRef)
     }
   }, [api, onSelect])
 

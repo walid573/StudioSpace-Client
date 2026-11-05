@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { CalendarX } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -39,7 +39,7 @@ export default function DeleteBooking({
   bookingId,
   studioTitle,
   triggerClassName = DEFAULT_TRIGGER,
-  label = "Delete",
+  label = "Cancel Booking",
   onDeleted,
 }: DeleteBookingProps) {
   const { data: session } = authClient.useSession();
@@ -97,10 +97,10 @@ export default function DeleteBooking({
 
     
       toast.add({
-        title: "Booking deleted",
+        title: "Booking cancelled",
         description: studioTitle
-          ? `Your booking for ${studioTitle} has been removed.`
-          : "Your booking has been removed.",
+          ? `Your reservation for ${studioTitle} has been cancelled.`
+          : "Your booking has been cancelled.",
         type: "success",
       });
 
@@ -108,10 +108,10 @@ export default function DeleteBooking({
       onDeleted(bookingId);
       router.refresh();
     } catch (error) {
-      console.error("Delete booking error:", error);
+      console.error("Cancel booking error:", error);
 
       toast.add({
-        title: "Couldn't delete booking",
+        title: "Couldn't cancel booking",
         description:
           error instanceof Error
             ? error.message
@@ -129,27 +129,27 @@ export default function DeleteBooking({
         className={triggerClassName}
         disabled={deleting}
       >
-        <Trash2 className="size-3.5" aria-hidden="true" />
+        <CalendarX className="size-3.5" aria-hidden="true" />
         {label}
       </AlertDialogTrigger>
 
       <AlertDialogContent className="dark border border-white/10 bg-card text-white">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-white">
-            Delete this booking?
+            Cancel this booking?
           </AlertDialogTitle>
 
           <AlertDialogDescription className="text-neutral-400">
             {studioTitle
-              ? `Your booking for "${studioTitle}" will be permanently removed.`
-              : "This booking will be permanently removed."}{" "}
-            This can't be undone.
+              ? `Your reservation for "${studioTitle}" will be withdrawn.`
+              : "This reservation will be withdrawn."}{" "}
+            This can&apos;t be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <AlertDialogFooter>
           <AlertDialogCancel disabled={deleting}>
-            Cancel
+            Keep booking
           </AlertDialogCancel>
 
           <AlertDialogAction
@@ -160,7 +160,7 @@ export default function DeleteBooking({
             disabled={deleting}
             className="bg-red-500 text-white hover:bg-red-600"
           >
-            {deleting ? "Deleting…" : "Delete"}
+            {deleting ? "Cancelling…" : "Cancel booking"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -55,7 +55,32 @@ export type Studio = {
   reviews: { name: string; date: string; text: string }[];
 };
 
-async function getStudio(studioId: string): Promise<any | null> {
+/**
+ * The API returns loosely-shaped MongoDB documents. They are read through
+ * `unknown`-typed field access so no `any` leaks into the component.
+ */
+type RawStudio = Record<string, unknown>;
+
+const asRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+
+const text = (value: unknown, fallback = ""): string =>
+  value == null || value === "" ? fallback : String(value);
+
+const number = (value: unknown, fallback: number): number => {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (
+    typeof value === "string" &&
+    value.trim() !== "" &&
+    !Number.isNaN(Number(value))
+  )
+    return Number(value);
+  return fallback;
+};
+
+async function getStudio(studioId: string): Promise<RawStudio | null> {
   const decoded = decodeURIComponent(studioId).trim();
   const safeId = encodeURIComponent(decoded);
 
@@ -73,8 +98,9 @@ async function getStudio(studioId: string): Promise<any | null> {
     });
 
     if (res.ok) {
-      const json = await res.json();
-      return json?.studio ?? json?.data ?? json;
+      const json = (await res.json()) as Record<string, unknown> | null;
+      const root = json?.studio ?? json?.data ?? json;
+      return asRecord(root);
     }
 
     console.warn("GET /studios/:id failed", res.status, await res.text());
@@ -89,10 +115,21 @@ async function getStudio(studioId: string): Promise<any | null> {
       return null;
     }
 
-    const body = await allRes.json();
-    const list = Array.isArray(body) ? body : body?.studios ?? body?.data ?? [];
+    const body: unknown = await allRes.json();
+    const wrap = asRecord(body);
+    const list: unknown[] = Array.isArray(body)
+      ? body
+      : Array.isArray(wrap.studios)
+        ? wrap.studios
+        : Array.isArray(wrap.data)
+          ? wrap.data
+          : [];
 
-    return list.find((s: any) => s._id === decoded || s.slug === decoded) ?? null;
+    const found = list.find((item) => {
+      const rec = asRecord(item);
+      return rec._id === decoded || rec.slug === decoded;
+    });
+    return found ? asRecord(found) : null;
   } catch (error) {
     console.error("Error fetching studio:", error);
     return null;
@@ -127,10 +164,13 @@ function normalizeSpecs(value: unknown): { label: string; value: string }[] {
   if (!Array.isArray(value)) return [];
 
   return value
-    .map((item: any) => ({
-      label: String(item?.label ?? "").trim(),
-      value: String(item?.value ?? "").trim(),
-    }))
+    .map((item: unknown) => {
+      const rec = asRecord(item);
+      return {
+        label: String(rec.label ?? "").trim(),
+        value: String(rec.value ?? "").trim(),
+      };
+    })
     .filter((s) => s.label && s.value);
 }
 
@@ -145,7 +185,7 @@ function formatMoney(value: unknown): string | null {
  * Custom specs saved on the studio (api.specs) are added too and
  * override a derived row when the label matches.
  */
-function buildSpecs(api: any): { label: string; value: string }[] {
+function buildSpecs(api: RawStudio): { label: string; value: string }[] {
   const derived: { label: string; value: string }[] = [];
 
   const push = (label: string, value: unknown) => {
@@ -176,10 +216,11 @@ function buildSpecs(api: any): { label: string; value: string }[] {
   const deposit = formatMoney(api.securityDeposit);
   if (deposit) push("Security deposit", deposit);
 
-  const area = api.location?.area ?? api.area;
-  const city = api.location?.city ?? api.city;
+  const loc = asRecord(api.location);
+  const area = loc.area ?? api.area;
+  const city = loc.city ?? api.city;
   push("Location", [area, city].filter(Boolean).join(", "));
-  push("Address", api.location?.address ?? api.address);
+  push("Address", loc.address ?? api.address);
 
   if (Array.isArray(api.amenities) && api.amenities.length > 0) {
     push("Amenities", `${api.amenities.length} included`);
@@ -204,8 +245,8 @@ function formatMonthYear(value: unknown): string {
  * Builds the host card from real fields only. Anything the API does not
  * provide stays empty, and the UI hides that line.
  */
-function buildHost(api: any): Studio["host"] {
-  const owner = api.host ?? api.owner ?? {};
+function buildHost(api: RawStudio): Studio["host"] {
+  const owner = asRecord(api.host ?? api.owner);
 
   const name = String(
     api.hostName ?? api.ownerName ?? owner.name ?? ""
@@ -242,11 +283,14 @@ function normalizeReviews(value: unknown): Studio["reviews"] {
   if (!Array.isArray(value)) return [];
 
   return value
-    .map((item: any) => ({
-      name: String(item?.name ?? item?.userName ?? "").trim(),
-      date: String(item?.date ?? item?.createdAt ?? "").trim(),
-      text: String(item?.text ?? item?.comment ?? "").trim(),
-    }))
+    .map((item: unknown) => {
+      const rec = asRecord(item);
+      return {
+        name: String(rec.name ?? rec.userName ?? "").trim(),
+        date: String(rec.date ?? rec.createdAt ?? "").trim(),
+        text: String(rec.text ?? rec.comment ?? "").trim(),
+      };
+    })
     .filter((r) => r.name && r.text);
 }
 
@@ -256,7 +300,8 @@ const isGradient = (value: string) =>
 const DEFAULT_GALLERY =
   "linear-gradient(135deg, #3a8bc2 0%, #2e5d93 40%, #173f66 100%)";
 
-function transformStudio(api: any): Studio {
+function transformStudio(api: RawStudio): Studio {
+  const location = asRecord(api.location);
   const gallerySources: unknown[] = Array.isArray(api.gallery)
     ? api.gallery
     : Array.isArray(api.images)
@@ -269,25 +314,30 @@ function transformStudio(api: any): Studio {
     .filter((value) => isGradient(value) || isImageSource(value));
 
   return {
-    _id: api._id,
-    title: api.title,
-    slug: api.slug,
-    category: api.category,
-    hourlyRate: api.hourlyRate,
-    securityDeposit: api.securityDeposit ?? 100,
-    rating: api.rating ?? 0,
-    reviewCount: api.reviewCount ?? 0,
+    _id: text(api._id),
+    title: text(api.title),
+    slug: text(api.slug),
+    category: text(api.category),
+    hourlyRate: number(api.hourlyRate, 0),
+    securityDeposit: number(api.securityDeposit, 100),
+    rating: number(api.rating, 0),
+    reviewCount: number(api.reviewCount, 0),
     location: {
-      city: api.location?.city ?? api.city ?? "",
-      area: api.location?.area ?? api.area ?? "",
-      address: api.location?.address ?? api.address ?? "",
+      city: text(location.city ?? api.city),
+      area: text(location.area ?? api.area),
+      address: text(location.address ?? api.address),
     },
     capacity: normalizeCapacity(api.capacity ?? api.maxCapacity),
-    description: api.description ?? api.overview ?? "",
+    description: text(api.description ?? api.overview),
     gallery: gallery.length ? gallery : [DEFAULT_GALLERY],
-    amenities: Array.isArray(api.amenities) ? api.amenities : [],
+    amenities: Array.isArray(api.amenities)
+      ? api.amenities.filter((a): a is string => typeof a === "string")
+      : [],
     specs: buildSpecs(api),
-    ownerEmail: api.ownerEmail ?? api.hostEmail,
+    ownerEmail:
+      api.ownerEmail == null && api.hostEmail == null
+        ? undefined
+        : text(api.ownerEmail ?? api.hostEmail),
     host: buildHost(api),
     reviews: normalizeReviews(api.reviews),
   };
